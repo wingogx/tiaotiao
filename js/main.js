@@ -785,6 +785,12 @@ export default class Main {
   landOnNearestPlatform() {
     console.log('🚀 飞行状态结束，寻找最近的台阶降落...');
     
+    // 检查player对象是否有效
+    if (!this.player || typeof this.player.endFlying !== 'function') {
+      console.log('🚀 landOnNearestPlatform：player对象无效，跳过');
+      return;
+    }
+    
     // 结束飞行状态
     this.player.endFlying();
     
@@ -870,6 +876,13 @@ export default class Main {
         // 清除之前的定时器
         if (this.invincibleTimer) clearTimeout(this.invincibleTimer);
         this.invincibleTimer = setTimeout(() => {
+          // 检查游戏状态是否仍然有效
+          if (this.gameState !== 'playing') {
+            console.log('🛡️ 无敌定时器回调：游戏状态已改变，跳过');
+            this.invincibleTimer = null;
+            return;
+          }
+          
           this.invincibleActive = false;
           this.invincibleTimer = null;
           
@@ -892,6 +905,13 @@ export default class Main {
         // 清除之前的定时器
         if (this.flyingTimer) clearTimeout(this.flyingTimer);
         this.flyingTimer = setTimeout(() => {
+          // 检查游戏状态和player对象是否仍然有效
+          if (this.gameState !== 'playing' || !this.player || typeof this.player.endFlying !== 'function') {
+            console.log('🚀 飞行定时器回调：游戏状态已改变或player对象无效，跳过');
+            this.flyingTimer = null;
+            return;
+          }
+          
           this.flyingActive = false;
           this.flyingTimer = null;
           
