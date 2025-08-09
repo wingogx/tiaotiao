@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, orientation=landscape">
+    <title>跳一跳游戏测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            /* 强制横屏 */
+            transform: rotate(0deg);
+            overflow: hidden;
+        }
+        
+        /* 横屏样式 */
+        @media screen and (orientation: portrait) {
+            body {
+                transform: rotate(90deg);
+                transform-origin: center center;
+                width: 100vh;
+                height: 100vw;
+                position: fixed;
+                top: 0;
+                left: 0;
+            }
+        }
+        
+        #gameContainer {
+            position: relative;
+            background: #87CEEB;
+            border: 2px solid #333;
+            border-radius: 10px;
+            overflow: hidden;
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+        
+        canvas {
+            display: block;
+            background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+            max-width: 100%;
+            max-height: 100%;
+            cursor: pointer;
+        }
+        
+        #gameInfo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 100;
+        }
+        
+        #loadingText {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            z-index: 200;
+        }
+        
+        /* 横屏提示 */
+        .landscape-hint {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        @media screen and (orientation: portrait) {
+            .landscape-hint {
+                display: block;
+            }
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            max-width: 375px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .instructions ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="landscape-hint">
+        <h3>请将设备横屏</h3>
+        <p>为了更好的游戏体验，请将您的设备旋转至横屏模式</p>
+    </div>
+    
+    <div id="gameContainer">
+        <div id="loadingText">游戏加载中...</div>
+        <canvas id="canvas" width="800" height="450"></canvas>
+        <div id="gameInfo" style="display: none;">
+            <div>游戏状态: <span id="gameState">-</span></div>
+            <div>平台数量: <span id="platformCount">-</span></div>
+            <div>玩家位置: <span id="playerPos">-</span></div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h3>游戏说明</h3>
+        <ul>
+            <li>点击"开始游戏"进入游戏</li>
+            <li>长按屏幕蓄力（会显示蓄力条和轨迹预测）</li>
+            <li>松开鼠标执行跳跃</li>
+            <li>落在台阶上得分，落在空隙中游戏结束</li>
+        </ul>
+        <p><strong>注意：</strong>如果看不到台阶或蓄力条，请检查浏览器控制台的错误信息。</p>
+    </div>
+
+    <script type="module">
+        // 模拟微信小游戏环境
+        window.GameGlobal = {};
+        window.canvas = document.getElementById('canvas');
+        
+        // 模拟微信API
+        window.wx = {
+            createCanvas: () => canvas,
+            createImage: () => new Image(),
+            createInnerAudioContext: () => ({
+                play: () => {},
+                stop: () => {},
+                currentTime: 0,
+                loop: false,
+                volume: 1,
+                src: ''
+            }),
+            getWindowInfo: () => ({
+                screenWidth: canvas.width,
+                screenHeight: canvas.height
+            }),
+            onTouchStart: (callback) => {
+                canvas.addEventListener('mousedown', (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    callback({
+                        touches: [{
+                            clientX: e.clientX - rect.left,
+                            clientY: e.clientY - rect.top
+                        }]
+                    });
+                });
+                
+                canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const rect = canvas.getBoundingClientRect();
+                    callback({
+                        touches: [{
+                            clientX: e.touches[0].clientX - rect.left,
+                            clientY: e.touches[0].clientY - rect.top
+                        }]
+                    });
+                });
+            },
+            onTouchMove: (callback) => {
+                canvas.addEventListener('mousemove', (e) => {
+                    if (e.buttons === 1) {
+                        const rect = canvas.getBoundingClientRect();
+                        callback({
+                            touches: [{
+                                clientX: e.clientX - rect.left,
+                                clientY: e.clientY - rect.top
+                            }]
+                        });
+                    }
+                });
+                
+                canvas.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    const rect = canvas.getBoundingClientRect();
+                    callback({
+                        touches: [{
+                            clientX: e.touches[0].clientX - rect.left,
+                            clientY: e.touches[0].clientY - rect.top
+                        }]
+                    });
+                });
+            },
+            onTouchEnd: (callback) => {
+                canvas.addEventListener('mouseup', callback);
+                canvas.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    callback();
+                });
+            },
+            onTouchCancel: (callback) => {
+                canvas.addEventListener('mouseleave', callback);
+                canvas.addEventListener('touchcancel', (e) => {
+                    e.preventDefault();
+                    callback();
+                });
+            },
+            vibrateShort: () => {},
+            getStorageSync: (key) => localStorage.getItem(key) || 0,
+            setStorageSync: (key, value) => localStorage.setItem(key, value)
+        };
+
+        // 动态导入游戏模块
+        async function loadGame() {
+            try {
+                console.log('开始加载游戏...');
+                
+                // 显示加载信息
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#333333';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('游戏加载中...', canvas.width / 2, canvas.height / 2);
+                
+                // 导入游戏主模块
+                const { default: Main } = await import('./js/main.js');
+                
+                // 创建游戏实例
+                const game = new Main();
+                
+                console.log('游戏启动成功！');
+                
+                // 添加一些调试信息
+                window.game = game;
+                console.log('游戏对象已添加到 window.game，可以在控制台中调试');
+                console.log('游戏状态:', game.gameState);
+                console.log('平台数量:', game.platformManager.platforms.length);
+                console.log('玩家位置:', game.player.x, game.player.y);
+                
+            } catch (error) {
+                console.error('游戏加载失败:', error);
+                console.error('错误堆栈:', error.stack);
+                
+                // 显示错误信息
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#FF0000';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('游戏加载失败', canvas.width / 2, canvas.height / 2 - 40);
+                ctx.font = '14px Arial';
+                ctx.fillText('请检查控制台错误信息', canvas.width / 2, canvas.height / 2 - 10);
+                ctx.fillText(error.message, canvas.width / 2, canvas.height / 2 + 20);
+            }
+        }
+        
+        // 等待DOM加载完成后启动游戏
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadGame);
+        } else {
+            loadGame();
+        }
+    </script>
+</body>
+</html>

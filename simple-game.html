@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跳台阶游戏 - 简化版</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        
+        #gameContainer {
+            position: relative;
+            border: 2px solid #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        canvas {
+            display: block;
+            cursor: pointer;
+            background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+        }
+        
+        .info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #333;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        
+        .instructions {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #333;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="375" height="667"></canvas>
+        <div class="info" id="scoreInfo">分数: 0</div>
+        <div class="instructions">
+            长按屏幕蓄力，松开跳跃<br>
+            落在绿色台阶上得分
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreInfo = document.getElementById('scoreInfo');
+        
+        // 游戏常量
+        const GRAVITY = 0.8;
+        const GROUND_Y = 600;
+        const PLAYER_SIZE = 30;
+        
+        // 游戏状态
+        let gameState = 'playing'; // playing, gameOver
+        let score = 0;
+        let isCharging = false;
+        let chargePower = 0;
+        let isMouseDown = false;
+        
+        // 玩家对象
+        const player = {
+            x: 50,
+            y: GROUND_Y - PLAYER_SIZE,
+            width: PLAYER_SIZE,
+            height: PLAYER_SIZE,
+            velocityX: 0,
+            velocityY: 0,
+            isOnGround: true,
+            isJumping: false
+        };
+        
+        // 台阶数组
+        const platforms = [];
+        
+        // 初始化台阶
+        function initPlatforms() {
+            platforms.length = 0;
+            
+            // 起始台阶
+            platforms.push({
+                x: 20,
+                y: GROUND_Y,
+                width: 80,
+                height: 20,
+                color: '#4CAF50'
+            });
+            
+            // 生成后续台阶
+            let nextX = 150;
+            for (let i = 0; i < 10; i++) {
+                const gap = 60 + Math.random() * 80; // 台阶间距
+                const width = 60 + Math.random() * 40; // 台阶宽度
+                
+                platforms.push({
+                    x: nextX,
+                    y: GROUND_Y,
+                    width: width,
+                    height: 20,
+                    color: '#4CAF50'
+                });
+                
+                nextX += gap + width;
+            }
+        }
+        
+        // 重置游戏
+        function resetGame() {
+            player.x = 50;
+            player.y = GROUND_Y - PLAYER_SIZE;
+            player.velocityX = 0;
+            player.velocityY = 0;
+            player.isOnGround = true;
+            player.isJumping = false;
+            score = 0;
+            chargePower = 0;
+            isCharging = false;
+            gameState = 'playing';
+            initPlatforms();
+        }
+        
+        // 开始蓄力
+        function startCharging() {
+            if (player.isOnGround && !player.isJumping && gameState === 'playing') {
+                isCharging = true;
+                chargePower = 5; // 最小力度
+                console.log('开始蓄力');
+            }
+        }
+        
+        // 持续蓄力
+        function charge() {
+            if (isCharging && chargePower < 25) {
+                chargePower += 0.8;
+                console.log('蓄力中:', chargePower);
+            }
+        }
+        
+        // 执行跳跃
+        function jump() {
+            if (isCharging && player.isOnGround && gameState === 'playing') {
+                player.velocityX = chargePower * 1.5; // 水平速度
+                player.velocityY = -chargePower * 0.8; // 垂直速度
+                player.isOnGround = false;
+                player.isJumping = true;
+                isCharging = false;
+                chargePower = 0;
+                console.log('跳跃！水平速度:', player.velocityX, '垂直速度:', player.velocityY);
+            }
+        }
+        
+        // 更新玩家
+        function updatePlayer() {
+            if (gameState !== 'playing') return;
+            
+            // 应用重力
+            if (!player.isOnGround) {
+                player.velocityY += GRAVITY;
+            }
+            
+            // 更新位置
+            player.x += player.velocityX;
+            player.y += player.velocityY;
+            
+            // 检查是否落到地面
+            if (player.y >= GROUND_Y - PLAYER_SIZE && player.velocityY > 0) {
+                player.y = GROUND_Y - PLAYER_SIZE;
+                player.velocityY = 0;
+                player.velocityX = 0;
+                player.isOnGround = true;
+                player.isJumping = false;
+                
+                // 检查是否在台阶上
+                let onPlatform = false;
+                for (let platform of platforms) {
+                    if (player.x + player.width > platform.x && 
+                        player.x < platform.x + platform.width) {
+                        onPlatform = true;
+                        break;
+                    }
+                }
+                
+                if (!onPlatform) {
+                    gameState = 'gameOver';
+                    console.log('游戏结束 - 落在空隙中');
+                }
+            }
+            
+            // 检查台阶碰撞
+            for (let i = 0; i < platforms.length; i++) {
+                const platform = platforms[i];
+                
+                if (player.velocityY >= 0 && // 正在下降
+                    player.x + player.width > platform.x &&
+                    player.x < platform.x + platform.width &&
+                    player.y + player.height >= platform.y &&
+                    player.y + player.height <= platform.y + platform.height + 10) {
+                    
+                    // 着陆成功
+                    player.y = platform.y - player.height;
+                    player.velocityY = 0;
+                    player.velocityX = 0;
+                    player.isOnGround = true;
+                    player.isJumping = false;
+                    
+                    // 增加分数
+                    if (i > 0) { // 不是起始台阶
+                        score += 10;
+                        console.log('得分！当前分数:', score);
+                    }
+                    break;
+                }
+            }
+            
+            // 检查是否掉出屏幕
+            if (player.y > canvas.height) {
+                gameState = 'gameOver';
+                console.log('游戏结束 - 掉出屏幕');
+            }
+        }
+        
+        // 绘制玩家
+        function drawPlayer() {
+            // 玩家主体
+            ctx.fillStyle = '#FF6B6B';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // 眼睛
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(player.x + 8, player.y + 8, 6, 6);
+            ctx.fillRect(player.x + 16, player.y + 8, 6, 6);
+            
+            // 瞳孔
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(player.x + 10, player.y + 10, 2, 2);
+            ctx.fillRect(player.x + 18, player.y + 10, 2, 2);
+        }
+        
+        // 绘制蓄力条
+        function drawPowerBar() {
+            if (!isCharging) return;
+            
+            const barWidth = 120;
+            const barHeight = 15;
+            const barX = player.x - 20;
+            const barY = player.y - 40;
+            
+            // 背景
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(barX, barY, barWidth, barHeight);
+            
+            // 蓄力条
+            const powerRatio = Math.min(1, (chargePower - 5) / 20);
+            const color = powerRatio > 0.8 ? '#FF4444' : powerRatio > 0.5 ? '#FFAA44' : '#44FF44';
+            ctx.fillStyle = color;
+            ctx.fillRect(barX + 2, barY + 2, (barWidth - 4) * powerRatio, barHeight - 4);
+            
+            // 边框
+            ctx.strokeStyle = '#333333';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(barX, barY, barWidth, barHeight);
+            
+            // 力度文字
+            ctx.fillStyle = '#333333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`力度: ${Math.round(chargePower)}`, barX + barWidth / 2, barY - 5);
+        }
+        
+        // 绘制轨迹预测
+        function drawTrajectory() {
+            if (!isCharging) return;
+            
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            
+            let trajX = player.x + player.width / 2;
+            let trajY = player.y;
+            let velX = chargePower * 1.5;
+            let velY = -chargePower * 0.8;
+            
+            ctx.moveTo(trajX, trajY);
+            
+            for (let i = 0; i < 30; i++) {
+                velY += GRAVITY * 2;
+                trajX += velX * 2;
+                trajY += velY * 2;
+                
+                if (trajY >= GROUND_Y) {
+                    ctx.lineTo(trajX, GROUND_Y);
+                    break;
+                }
+                
+                ctx.lineTo(trajX, trajY);
+            }
+            
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        
+        // 绘制台阶
+        function drawPlatforms() {
+            platforms.forEach(platform => {
+                // 台阶主体
+                ctx.fillStyle = platform.color;
+                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                
+                // 台阶边框
+                ctx.strokeStyle = '#2E7D32';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
+                
+                // 台阶高光
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.fillRect(platform.x, platform.y, platform.width, 5);
+            });
+        }
+        
+        // 绘制地面
+        function drawGround() {
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(0, GROUND_Y + 20, canvas.width, canvas.height - GROUND_Y - 20);
+            
+            // 地面装饰
+            ctx.fillStyle = '#228B22';
+            for (let x = 0; x < canvas.width; x += 25) {
+                ctx.fillRect(x, GROUND_Y + 15, 15, 8);
+            }
+        }
+        
+        // 绘制游戏结束界面
+        function drawGameOver() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 36px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('游戏结束', canvas.width / 2, canvas.height / 2 - 50);
+            
+            ctx.font = '24px Arial';
+            ctx.fillText(`最终分数: ${score}`, canvas.width / 2, canvas.height / 2);
+            
+            ctx.font = '18px Arial';
+            ctx.fillText('点击重新开始', canvas.width / 2, canvas.height / 2 + 50);
+        }
+        
+        // 主渲染函数
+        function render() {
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制游戏元素
+            drawGround();
+            drawPlatforms();
+            drawPlayer();
+            drawPowerBar();
+            drawTrajectory();
+            
+            // 更新分数显示
+            scoreInfo.textContent = `分数: ${score}`;
+            
+            // 游戏结束界面
+            if (gameState === 'gameOver') {
+                drawGameOver();
+            }
+        }
+        
+        // 游戏主循环
+        function gameLoop() {
+            updatePlayer();
+            
+            // 如果正在蓄力，持续增加力度
+            if (isCharging && isMouseDown) {
+                charge();
+            }
+            
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // 事件监听
+        canvas.addEventListener('mousedown', (e) => {
+            if (gameState === 'gameOver') {
+                resetGame();
+                return;
+            }
+            
+            isMouseDown = true;
+            startCharging();
+        });
+        
+        canvas.addEventListener('mouseup', (e) => {
+            isMouseDown = false;
+            jump();
+        });
+        
+        canvas.addEventListener('mouseleave', (e) => {
+            isMouseDown = false;
+            if (isCharging) {
+                jump();
+            }
+        });
+        
+        // 触摸事件支持
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameState === 'gameOver') {
+                resetGame();
+                return;
+            }
+            
+            isMouseDown = true;
+            startCharging();
+        });
+        
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isMouseDown = false;
+            jump();
+        });
+        
+        canvas.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            isMouseDown = false;
+            if (isCharging) {
+                jump();
+            }
+        });
+        
+        // 初始化游戏
+        resetGame();
+        gameLoop();
+        
+        console.log('游戏已启动！');
+        console.log('玩家位置:', player.x, player.y);
+        console.log('台阶数量:', platforms.length);
+    </script>
+</body>
+</html>

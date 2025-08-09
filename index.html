@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跳一跳小游戏 - 预览版</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        
+        #gameContainer {
+            position: relative;
+            background: #87CEEB;
+            border: 2px solid #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        canvas {
+            display: block;
+            cursor: pointer;
+        }
+        
+
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="450"></canvas>
+    </div>
+
+    <script>
+        // 模拟微信小游戏环境
+        window.GameGlobal = {};
+        window.canvas = document.getElementById('gameCanvas');
+        
+        // 模拟微信API
+        window.wx = {
+            createCanvas: () => canvas,
+            createImage: () => new Image(),
+            createInnerAudioContext: () => ({
+                play: () => {},
+                stop: () => {},
+                currentTime: 0,
+                loop: false,
+                volume: 1,
+                src: ''
+            }),
+            getWindowInfo: () => ({
+                screenWidth: canvas.width,
+                screenHeight: canvas.height
+            }),
+            onTouchStart: (callback) => {
+                canvas.addEventListener('mousedown', (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    callback({
+                        touches: [{
+                            clientX: e.clientX - rect.left,
+                            clientY: e.clientY - rect.top
+                        }]
+                    });
+                });
+            },
+            onTouchMove: (callback) => {
+                canvas.addEventListener('mousemove', (e) => {
+                    if (e.buttons === 1) { // 鼠标按下状态
+                        const rect = canvas.getBoundingClientRect();
+                        callback({
+                            touches: [{
+                                clientX: e.clientX - rect.left,
+                                clientY: e.clientY - rect.top
+                            }]
+                        });
+                    }
+                });
+            },
+            onTouchEnd: (callback) => {
+                canvas.addEventListener('mouseup', callback);
+            },
+            onTouchCancel: (callback) => {
+                canvas.addEventListener('mouseleave', callback);
+            },
+            vibrateShort: () => {},
+            getStorageSync: (key) => localStorage.getItem(key) || 0,
+            setStorageSync: (key, value) => localStorage.setItem(key, value)
+        };
+
+        // 动态导入游戏模块
+        async function loadGame() {
+            try {
+                console.log('游戏环境初始化完成');
+                
+                // 导入游戏主模块
+                const { default: Main } = await import('./js/main.js');
+                
+                // 创建游戏实例
+                new Main();
+                
+                console.log('游戏启动成功！');
+                
+            } catch (error) {
+                console.error('游戏加载失败:', error);
+                
+                // 显示错误信息
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#FF0000';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('游戏加载失败', canvas.width / 2, canvas.height / 2);
+                ctx.font = '14px Arial';
+                ctx.fillText('请检查控制台错误信息', canvas.width / 2, canvas.height / 2 + 30);
+            }
+        }
+        
+        loadGame();
+    </script>
+</body>
+</html>
