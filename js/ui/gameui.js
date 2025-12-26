@@ -153,9 +153,15 @@ export default class GameUI {
   }
 
   renderGame(ctx) {
+    // 游戏标题显示（屏幕顶部中央）
+    ctx.fillStyle = '#FF6B6B';
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('快乐跳一跳', SCREEN_WIDTH / 2 + 50, 60);
+
     // 倒计时器显示（最顶部）
     console.log('正在渲染倒计时器...');
-    
+
     // 倒计时器背景
     ctx.fillStyle = 'rgba(255, 0, 0, 0.9)'; // 红色半透明背景
     ctx.fillRect(20, 5, 160, 25); // 移到更顶部
