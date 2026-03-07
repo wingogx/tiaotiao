@@ -815,3 +815,92 @@ function getFilteredTasks() {
     
     return tasks;
 }
+
+// Excel 导出功能
+function exportToExcel() {
+    if (!app.data) return;
+    
+    // 准备数据
+    const tasks = app.data.tasks.map(t => ({
+        '任务标题': t.title,
+        '负责人': t.assignee,
+        '状态': t.status === 'completed' ? '已完成' : t.status === 'in-progress' ? '进行中' : '待办',
+        '进度': t.progress + '%',
+        '截止日期': t.dueDate
+    }));
+    
+    // 转换为 CSV
+    const headers = Object.keys(tasks[0]);
+    const csv = [
+        headers.join(','),
+        ...tasks.map(row => headers.map(h => row[h]).join(','))
+    ].join('\n');
+    
+    // 下载
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `任务数据_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+}
+
+// PDF 导出功能（简化版）
+function exportToPDF() {
+    window.print();
+}
+
+// 添加导出按钮到页面
+function addExportButtons() {
+    const header = document.querySelector('.dashboard-header');
+    if (header && !document.querySelector('.export-buttons')) {
+        const buttons = document.createElement('div');
+        buttons.className = 'export-buttons';
+        buttons.innerHTML = `
+            <button class="btn btn-primary" onclick="exportToExcel()">📊 导出 Excel</button>
+            <button class="btn btn-secondary" onclick="exportToPDF()">📄 导出 PDF</button>
+        `;
+        header.appendChild(buttons);
+    }
+}
+
+// 优化的自动刷新
+function showRefreshNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'refresh-notification';
+    notification.textContent = '✓ 数据已更新';
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.classList.add('show'), 10);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 2000);
+}
+
+// 手动刷新按钮
+function addRefreshButton() {
+    const lastUpdate = document.getElementById('lastUpdate');
+    if (lastUpdate && !document.querySelector('.refresh-btn')) {
+        const btn = document.createElement('button');
+        btn.className = 'refresh-btn';
+        btn.innerHTML = '🔄';
+        btn.title = '手动刷新';
+        btn.onclick = () => {
+            btn.classList.add('spinning');
+            app.loadData().then(() => {
+                app.renderPage(app.currentPage);
+                showRefreshNotification();
+                btn.classList.remove('spinning');
+            });
+        };
+        lastUpdate.parentElement.appendChild(btn);
+    }
+}
+
+// 在页面加载时添加按钮
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        addRefreshButton();
+        addExportButtons();
+    }, 1000);
+});
