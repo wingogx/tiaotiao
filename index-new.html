@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小龙虾赚钱赎身记 - 项目管理系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">🦞 小龙虾赚钱赎身记</div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-page="home">首页</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="projects">项目看板</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="tasks">任务跟踪</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="progress">进度完成</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="revenue">收入统计</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="team">团队状态</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="logs">执行日志</a>
+                </li>
+            </ul>
+            <div class="nav-update" id="lastUpdate">加载中...</div>
+        </div>
+    </nav>
+
+    <div class="container" id="app">
+        <!-- 页面内容将通过JavaScript动态加载 -->
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

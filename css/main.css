@@ -122,6 +122,7 @@ body {
     max-width: 1400px;
     margin: 0 auto;
     padding: var(--space-lg) var(--space-md);
+    transition: opacity 0.3s ease;
 }
 
 /* 页面 */
