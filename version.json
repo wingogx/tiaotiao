@@ -1,0 +1,15 @@
+{
+  "version": "1.3.0",
+  "releaseDate": "2026-03-10",
+  "releaseName": "监控看板版本",
+  "features": [
+    "监控看板系统（P0 功能）",
+    "今日概览统计",
+    "项目进度展示",
+    "团队状态管理",
+    "一键催办功能",
+    "移动端完美适配"
+  ],
+  "developer": "程序员小昭",
+  "changelog": "CHANGELOG.md"
+}
