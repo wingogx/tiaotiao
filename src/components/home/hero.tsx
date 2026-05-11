@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
+import { Activity, CalendarDays, Coins, Flag, FolderKanban, Target } from 'lucide-react';
 
 import type { AwaitedReturn } from '@/types/common';
 import { formatCurrency, formatPercent } from '@/lib/utils/format';
@@ -10,36 +12,38 @@ type DashboardData = AwaitedReturn<typeof import('@/lib/data/queries').getDashbo
 
 export function Hero({ data }: { data: DashboardData }) {
   const { settings, summary } = data;
+  const dailyTarget = summary.gapToGoal / Math.max(settings.total_days - summary.currentDay + 1, 1);
 
   return (
-    <section className="page-shell grid gap-6 py-10 lg:grid-cols-[1.2fr_0.8fr] lg:py-14">
-      <div className="relative overflow-hidden rounded-[36px] border border-[var(--border)] bg-[linear-gradient(135deg,#0d5d4f_0%,#123328_58%,#1f231c_100%)] px-7 py-8 text-white shadow-[0_35px_80px_rgba(16,52,44,0.18)] md:px-10 md:py-12">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(219,143,47,0.28),transparent_26%),radial-gradient(circle_at_left,rgba(255,255,255,0.08),transparent_32%)]" />
+    <section className="page-shell grid gap-6 py-8 lg:grid-cols-[1.24fr_0.76fr] lg:py-12">
+      <div className="legacy-gradient relative overflow-hidden rounded-[28px] px-7 py-8 text-white shadow-[0_30px_80px_rgba(102,126,234,0.26)] md:px-10 md:py-11">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_28%),radial-gradient(circle_at_left,rgba(255,184,77,0.22),transparent_32%)]" />
         <div className="relative flex flex-col gap-8">
-          <div className="inline-flex w-fit items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs uppercase tracking-[0.22em] text-white/70">
-            Public Challenge Journal
+          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/18 bg-white/12 px-4 py-2 text-xs uppercase tracking-[0.18em] text-white/80">
+            <Flag size={14} /> 公开实盘挑战
           </div>
 
           <div className="max-w-3xl space-y-4">
             <h1 className="serif-heading text-4xl leading-tight md:text-6xl">
-              一个真实的长期实验：
+              1个人的赚钱赎身记：
               <br />
-              1000天，做到1000万。
+              1000天，赚到1000万。
             </h1>
             <p className="max-w-2xl text-base leading-8 text-white/78 md:text-lg">
-              这里公开记录每天的推进、判断、收入和复盘。前台给外界看清方向，后台帮我把项目、任务、文章和每日收入收在同一套系统里。
+              这不是课程包装页，而是每天记录项目、任务、收入和复盘的实盘系统。游客看进度和标题，会员看文章正文，后台只服务每天少量录入。
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            <MetricBox label="起始日期" value={settings.start_date} muted="长期挑战正式开始" />
-            <MetricBox label="当前天数" value={`第 ${summary.currentDay} 天`} muted="每天都算数" />
-            <MetricBox label="累计收入" value={formatCurrency(summary.totalRevenue)} muted={`总目标 ${formatCurrency(settings.total_target)}`} />
+          <div className="grid gap-4 md:grid-cols-4">
+            <MetricBox icon={<Target size={20} />} label="总目标" value={formatCurrency(settings.total_target)} muted="1000天终局" />
+            <MetricBox icon={<CalendarDays size={20} />} label="当前天数" value={`第 ${summary.currentDay} 天`} muted={`起始 ${settings.start_date}`} />
+            <MetricBox icon={<Coins size={20} />} label="累计收入" value={formatCurrency(summary.totalRevenue)} muted={`今日 ${formatCurrency(summary.todayRevenue)}`} />
+            <MetricBox icon={<FolderKanban size={20} />} label="活跃项目" value={`${summary.activeProjects} 个`} muted="并行收入来源" />
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <Link href="/articles">
-              <Button className="bg-[var(--highlight)] text-[#1f221f] hover:bg-[#ebb05b]">查看最新文章</Button>
+              <Button className="bg-[var(--highlight)] text-[#252038] hover:bg-[#ffc86f]">查看最新文章</Button>
             </Link>
             <Link href="/login">
               <Button variant="secondary" className="border-white/20 bg-white/10 text-white hover:bg-white/16">
@@ -50,24 +54,23 @@ export function Hero({ data }: { data: DashboardData }) {
         </div>
       </div>
 
-      <Card className="soft-grid flex flex-col justify-between gap-6 overflow-hidden rounded-[36px] bg-[linear-gradient(180deg,rgba(255,250,242,0.92),rgba(255,255,255,0.74))]">
+      <Card className="soft-grid flex flex-col justify-between gap-6 overflow-hidden rounded-[28px] bg-white/90">
         <div>
           <div className="text-sm uppercase tracking-[0.18em] text-[var(--muted)]">Goal Snapshot</div>
-          <h2 className="serif-heading mt-3 text-3xl text-[var(--foreground)]">前台只放真正重要的数字。</h2>
+          <h2 className="serif-heading mt-3 text-3xl text-[var(--foreground)]">目标、进度、缺口，一屏看懂。</h2>
         </div>
 
         <div className="grid gap-4">
-          <CompactMetric label="总目标进度" value={formatPercent(summary.incomeProgress)} />
-          <CompactMetric label="时间进度" value={formatPercent(summary.timeProgress)} />
-          <CompactMetric label="今日收入" value={formatCurrency(summary.todayRevenue)} />
-          <CompactMetric label="活跃项目" value={`${summary.activeProjects} 个`} />
-          <CompactMetric label="距离目标" value={formatCurrency(summary.gapToGoal)} />
+          <ProgressMetric label="收入进度" value={formatPercent(summary.incomeProgress)} percent={summary.incomeProgress} />
+          <ProgressMetric label="时间进度" value={formatPercent(summary.timeProgress)} percent={summary.timeProgress} />
+          <CompactMetric icon={<Activity size={17} />} label="剩余缺口" value={formatCurrency(summary.gapToGoal)} />
+          <CompactMetric icon={<Coins size={17} />} label="剩余日均需赚" value={formatCurrency(dailyTarget)} />
         </div>
 
-        <div className="rounded-[28px] border border-[var(--border)] bg-white/65 p-4">
+        <div className="rounded-[24px] border border-[var(--border)] bg-white/72 p-4">
           <div className="mb-2 text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Positioning</div>
           <p className="text-sm leading-7 text-[var(--foreground)]/80">
-            游客先看到目标、阶段和公开文章摘要；会员登录后再查看正文。页面后续可以按模块逐步放开，不必第一版把所有后台信息都暴露出来。
+            第一版不追求复杂，核心是把每天发生的收入、任务完成情况和复盘文章沉淀下来，让长期挑战有连续记录。
           </p>
         </div>
       </Card>
@@ -75,21 +78,35 @@ export function Hero({ data }: { data: DashboardData }) {
   );
 }
 
-function MetricBox({ label, value, muted }: { label: string; value: string; muted: string }) {
+function MetricBox({ icon, label, value, muted }: { icon: ReactNode; label: string; value: string; muted: string }) {
   return (
-    <div className="rounded-[28px] border border-white/12 bg-white/8 px-4 py-5 backdrop-blur-sm">
-      <div className="text-xs uppercase tracking-[0.16em] text-white/58">{label}</div>
+    <div className="rounded-[22px] border border-white/12 bg-white/10 px-4 py-5 backdrop-blur-sm">
+      <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-white/68">{icon}{label}</div>
       <div className="mt-3 text-2xl font-semibold">{value}</div>
       <div className="mt-2 text-sm text-white/62">{muted}</div>
     </div>
   );
 }
 
-function CompactMetric({ label, value }: { label: string; value: string }) {
+function CompactMetric({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between rounded-[20px] border border-[var(--border)] bg-white/70 px-4 py-4">
-      <span className="text-sm text-[var(--muted)]">{label}</span>
+    <div className="flex items-center justify-between rounded-[18px] border border-[var(--border)] bg-white/74 px-4 py-4">
+      <span className="flex items-center gap-2 text-sm text-[var(--muted)]">{icon}{label}</span>
       <span className="text-base font-semibold text-[var(--foreground)]">{value}</span>
+    </div>
+  );
+}
+
+function ProgressMetric({ label, value, percent }: { label: string; value: string; percent: number }) {
+  return (
+    <div className="rounded-[20px] border border-[var(--border)] bg-white/74 px-4 py-4">
+      <div className="mb-3 flex items-center justify-between text-sm">
+        <span className="text-[var(--muted)]">{label}</span>
+        <span className="font-semibold text-[var(--foreground)]">{value}</span>
+      </div>
+      <div className="legacy-progress">
+        <span style={{ width: `${Math.max(0, Math.min(100, percent))}%` }} />
+      </div>
     </div>
   );
 }

@@ -262,6 +262,42 @@ export async function getDashboardData() {
   };
 }
 
+export async function getTodayConsoleData() {
+  const [settings, projects, incomeRecords, tasks, posts] = await Promise.all([
+    getSiteSettings(),
+    getProjects(),
+    getIncomeRecords(),
+    getDailyTasks(),
+    getPosts(1),
+  ]);
+
+  const todayString = getTodayString();
+  const todayIncomeRecords = incomeRecords.filter((item) => item.record_date === todayString);
+  const todayRevenue = todayIncomeRecords.reduce((sum, item) => sum + Number(item.amount), 0);
+  const totalRevenue = incomeRecords.reduce((sum, item) => sum + Number(item.amount), 0);
+  const completedTasks = tasks.filter((item) => item.status === 'completed').length;
+  const pendingTasks = tasks.length - completedTasks;
+
+  return {
+    settings,
+    projects,
+    tasks,
+    posts,
+    incomeRecords,
+    todayIncomeRecords,
+    summary: {
+      todayString,
+      currentDay: getCurrentDayIndex(settings.start_date),
+      todayRevenue,
+      totalRevenue,
+      completedTasks,
+      pendingTasks,
+      totalTasks: tasks.length,
+      taskCompletionRate: tasks.length > 0 ? clampPercent((completedTasks / tasks.length) * 100) : 0,
+    },
+  };
+}
+
 export async function getProgressData() {
   const [settings, incomeRecords, tasks] = await Promise.all([
     getSiteSettings(),

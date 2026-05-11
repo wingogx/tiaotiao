@@ -15,13 +15,14 @@ const items = [
 
 export function AppSidebar({ pathname }: { pathname: string }) {
   return (
-    <aside className="glass-panel hidden min-h-[calc(100vh-112px)] rounded-[32px] p-5 lg:block">
-      <div className="mb-6 px-3">
-        <div className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Admin Console</div>
-        <div className="serif-heading mt-2 text-2xl text-[var(--foreground)]">实盘录入后台</div>
+    <aside className="glass-panel hidden min-h-[calc(100vh-112px)] overflow-hidden rounded-[28px] p-0 lg:block">
+      <div className="legacy-gradient px-5 py-6 text-white">
+        <div className="text-xs uppercase tracking-[0.2em] text-white/64">Admin Console</div>
+        <div className="serif-heading mt-2 text-2xl">实盘录入后台</div>
+        <div className="mt-2 text-xs leading-6 text-white/68">收入、任务、文章每天轻量录入。</div>
       </div>
 
-      <nav className="space-y-2">
+      <nav className="space-y-2 p-4">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
@@ -31,10 +32,10 @@ export function AppSidebar({ pathname }: { pathname: string }) {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 rounded-[22px] px-4 py-3 text-sm transition',
+                'flex items-center gap-3 rounded-[18px] px-4 py-3 text-sm transition',
                 isActive
-                  ? 'bg-[var(--accent)] text-white shadow-lg shadow-emerald-950/10'
-                  : 'text-[var(--foreground)]/78 hover:bg-white/70',
+                  ? 'legacy-gradient text-white shadow-lg shadow-indigo-900/12'
+                  : 'text-[var(--foreground)]/78 hover:bg-white/80',
               )}
             >
               <Icon size={18} />

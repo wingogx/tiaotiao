@@ -28,7 +28,7 @@ export function ArticlePreview({ data }: { data: DashboardData }) {
         ) : (
           data.posts.map((post, index) => (
             <Link key={post.id} href={`/articles/${post.slug}`}>
-              <Card className="flex h-full flex-col gap-4 rounded-[28px] p-5 transition duration-200 hover:-translate-y-1 hover:shadow-[0_22px_42px_rgba(16,52,44,0.12)]">
+              <Card className="legacy-card-hover flex h-full flex-col gap-4 rounded-[24px] p-5">
                 <div className="flex items-center justify-between text-xs uppercase tracking-[0.14em] text-[var(--muted)]">
                   <span>#{String(index + 1).padStart(2, '0')}</span>
                   <span>{formatDate(post.post_date)}</span>
