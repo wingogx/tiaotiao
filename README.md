@@ -1,97 +1,70 @@
-# 赚钱项目看板 - 部署说明
+# 1000天赚1000万 实盘跟踪日记
 
-## 已完成
+这是新的第一版站点代码，已经替换旧的静态看板结构。
 
-✅ 网页开发完成  
-✅ 数据结构设计完成  
-✅ 响应式设计（手机可访问）  
-✅ 实时数据展示
+当前技术栈：
 
-## 文件位置
+- `Next.js App Router`
+- `Supabase Auth + Postgres`
+- `Vercel` 部署
 
-- **网页文件：** `/root/.openclaw/agents/yunyingguan/workspace/revenue-dashboard/index.html`
-- **数据文件：** `/root/.openclaw/agents/yunyingguan/workspace/revenue-dashboard/data.json`
+## 当前功能
 
-## 部署方案
+- 公开首页 / 落地页
+- 文章列表与详情
+- 邮箱登录
+- 会员查看文章正文
+- 管理员今日录入区
+- 项目管理
+- 收入登记
+- 任务模板与当日任务清单
+- 用户权限管理
 
-### 方案1：Vercel部署（推荐）
+## 本地开发
 
-**步骤：**
+准备好 `.env.local` 后执行：
 
-1. 创建GitHub仓库
 ```bash
-cd /root/.openclaw/agents/yunyingguan/workspace/revenue-dashboard
-git init
-git add .
-git commit -m "Initial commit: Revenue Dashboard"
+npm install
+npm run dev
 ```
 
-2. 推送到GitHub
-```bash
-# 需要老大提供GitHub账号或创建新仓库
-```
+本地地址：`http://localhost:3000`
 
-3. 连接Vercel
-- 访问 vercel.com
-- 导入GitHub仓库
-- 自动部署
+## 数据库
 
-**优势：**
-- 免费
-- 自动HTTPS
-- 全球CDN
-- 每次更新自动部署
+初始化 SQL：
 
-### 方案2：本地预览（立即可用）
+- `supabase/migrations/20260511_init.sql`
 
-**启动本地服务器：**
-```bash
-cd /root/.openclaw/agents/yunyingguan/workspace/revenue-dashboard
-python3 -m http.server 8080
-```
+该迁移包含：
 
-**访问地址：**
-```
-http://localhost:8080
-```
+- 项目表
+- 收入记录表
+- 任务模板表
+- 当日任务表
+- 文章表
+- 用户角色表
+- 每日任务自动生成函数
 
-### 方案3：Netlify部署
+## 产品文档
 
-类似Vercel，也是免费的静态网站托管。
+PRD：
 
-## 数据更新方式
+- `docs/PRD-1000days-1000wan-v1.md`
 
-### 手动更新（当前）
+## 部署
 
-编辑 `data.json` 文件，修改：
-- 项目收入（current.amount）
-- 任务状态（tasks[].status）
-- 进度百分比（progress）
+线上域名：
 
-### 自动更新（未来）
+- `https://tiaotiao.ailoveai.shop/`
 
-可以开发API接口，让各个Agent自动上报数据。
+Vercel 环境变量需要与本地 `.env.local` 保持一致。
 
-## 功能特性
+## 安全提醒
 
-✅ **总收入展示** - 实时显示总收入和目标完成比例  
-✅ **项目卡片** - 每个项目的详细信息  
-✅ **任务追踪** - 每个任务的状态和负责人  
-✅ **进度条** - 可视化展示进度  
-✅ **响应式设计** - 手机、平板、电脑都能完美显示  
-✅ **美观界面** - 渐变色背景，现代化设计
+由于开发阶段使用过临时敏感配置，正式上线后建议执行以下收尾：
 
-## 下一步
-
-1. **立即预览** - 启动本地服务器查看效果
-2. **部署到公网** - 需要老大提供GitHub账号或Vercel账号
-3. **分享链接** - 部署后获得公开URL，分享给老大和朋友
-
-## 时间
-
-- 开发完成时间：2026-03-07 17:50
-- 预计部署时间：今晚22:00前
-
----
-
-**看板已经做好了！现在需要部署到公网。**
+- 重置数据库密码
+- 轮换 `SUPABASE_SERVICE_ROLE_KEY`
+- 删除临时 `VERCEL_TOKEN`
