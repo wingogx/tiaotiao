@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { BarChart3, ClipboardList, Coins, FileText, FolderKanban, LayoutDashboard, ShieldCheck } from 'lucide-react';
 
 import { cn } from '@/lib/utils/cn';
@@ -13,7 +16,9 @@ const items = [
   { href: '/app/users', label: '用户权限', icon: ShieldCheck },
 ];
 
-export function AppSidebar({ pathname }: { pathname: string }) {
+export function AppSidebar() {
+  const pathname = usePathname();
+
   return (
     <aside className="glass-panel hidden min-h-[calc(100vh-112px)] overflow-hidden rounded-[28px] p-0 lg:block">
       <div className="legacy-gradient px-5 py-6 text-white">
@@ -25,7 +30,7 @@ export function AppSidebar({ pathname }: { pathname: string }) {
       <nav className="space-y-2 p-4">
         {items.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
           return (
             <Link
