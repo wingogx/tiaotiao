@@ -26,9 +26,21 @@ const taskTemplateSchema = z.object({
   scheduledDate: z.string().optional(),
 });
 
+const taskTemplateUpdateSchema = taskTemplateSchema.extend({
+  id: z.string().uuid(),
+});
+
+const taskTemplateIdSchema = z.object({
+  id: z.string().uuid(),
+});
+
 const taskToggleSchema = z.object({
   taskId: z.string().uuid(),
   nextStatus: z.enum(['pending', 'completed']),
+});
+
+const dailyTaskIdSchema = z.object({
+  taskId: z.string().uuid(),
 });
 
 const tempTaskSchema = z.object({
@@ -262,6 +274,66 @@ export async function createTaskTemplate(formData: FormData) {
   revalidatePath('/app/today');
 }
 
+export async function updateTaskTemplate(formData: FormData) {
+  await requireAdmin();
+  const service = createServiceRoleClient();
+  const parsed = taskTemplateUpdateSchema.parse({
+    id: formData.get('id'),
+    title: formData.get('title'),
+    sourceType: formData.get('sourceType'),
+    projectId: formData.get('projectId'),
+    scheduledDate: formData.get('scheduledDate'),
+  });
+
+  const { error } = await service
+    .from('task_templates')
+    .update({
+      title: parsed.title,
+      source_type: parsed.sourceType,
+      project_id: parsed.projectId || null,
+      scheduled_date: parsed.sourceType === 'project_once' ? parsed.scheduledDate || null : null,
+    })
+    .eq('id', parsed.id);
+
+  if (error) {
+    throw new Error(`更新任务模板失败：${error.message}`);
+  }
+
+  revalidatePath('/app/tasks');
+  revalidatePath('/app/today');
+}
+
+export async function toggleTaskTemplateActive(formData: FormData) {
+  await requireAdmin();
+  const service = createServiceRoleClient();
+  const parsed = taskTemplateIdSchema.parse({ id: formData.get('id') });
+  const nextActive = String(formData.get('nextActive')) === 'true';
+
+  const { error } = await service.from('task_templates').update({ is_active: nextActive }).eq('id', parsed.id);
+
+  if (error) {
+    throw new Error(`更新任务模板状态失败：${error.message}`);
+  }
+
+  revalidatePath('/app/tasks');
+  revalidatePath('/app/today');
+}
+
+export async function deleteTaskTemplate(formData: FormData) {
+  await requireAdmin();
+  const service = createServiceRoleClient();
+  const parsed = taskTemplateIdSchema.parse({ id: formData.get('id') });
+
+  const { error } = await service.from('task_templates').delete().eq('id', parsed.id);
+
+  if (error) {
+    throw new Error(`删除任务模板失败：${error.message}`);
+  }
+
+  revalidatePath('/app/tasks');
+  revalidatePath('/app/today');
+}
+
 export async function toggleDailyTask(formData: FormData) {
   await requireAdmin();
   const service = createServiceRoleClient();
@@ -307,6 +379,24 @@ export async function createTemporaryTask(formData: FormData) {
 
   revalidatePath('/app/today');
   revalidatePath('/app/tasks');
+}
+
+export async function deleteDailyTask(formData: FormData) {
+  await requireAdmin();
+  const service = createServiceRoleClient();
+  const parsed = dailyTaskIdSchema.parse({
+    taskId: formData.get('taskId'),
+  });
+
+  const { error } = await service.from('daily_tasks').delete().eq('id', parsed.taskId);
+
+  if (error) {
+    throw new Error(`删除当天任务失败：${error.message}`);
+  }
+
+  revalidatePath('/app/today');
+  revalidatePath('/app/tasks');
+  revalidatePath('/app/progress');
 }
 
 export async function createPost(formData: FormData) {

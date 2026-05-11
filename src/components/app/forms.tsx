@@ -11,10 +11,14 @@ import {
   createProject,
   createTaskTemplate,
   createTemporaryTask,
+  deleteDailyTask,
   deleteProject,
+  deleteTaskTemplate,
   toggleDailyTask,
+  toggleTaskTemplateActive,
   updateProfileRole,
   updateProject,
+  updateTaskTemplate,
 } from '@/app/actions';
 import { formatCurrency } from '@/lib/utils/format';
 
@@ -72,23 +76,33 @@ export function TodayTaskList({ tasks }: { tasks: DailyTask[] }) {
           <div className="rounded-[22px] border border-dashed border-[var(--border)] px-4 py-5 text-sm text-[var(--muted)]">今天还没有任务清单。</div>
         ) : (
           tasks.map((task) => (
-            <form key={task.id} action={toggleDailyTask} className="flex items-center gap-3 rounded-[18px] border border-[var(--border)] bg-white/74 px-4 py-3 transition hover:border-[rgba(102,126,234,0.35)] hover:bg-white">
-              <input type="hidden" name="taskId" value={task.id} />
-              <input type="hidden" name="nextStatus" value={task.status === 'completed' ? 'pending' : 'completed'} />
-              <button
-                type="submit"
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border ${task.status === 'completed' ? 'border-[var(--accent)] bg-[var(--accent)] text-white' : 'border-[var(--border)] bg-white text-[var(--muted)]'}`}
-                aria-label={task.status === 'completed' ? '标记为未完成' : '标记为已完成'}
-              >
-                {task.status === 'completed' ? <CheckCircle2 size={16} /> : <Circle size={14} />}
-              </button>
+            <div key={task.id} className="flex items-center gap-3 rounded-[18px] border border-[var(--border)] bg-white/74 px-4 py-3 transition hover:border-[rgba(102,126,234,0.35)] hover:bg-white">
+              <form action={toggleDailyTask}>
+                <input type="hidden" name="taskId" value={task.id} />
+                <input type="hidden" name="nextStatus" value={task.status === 'completed' ? 'pending' : 'completed'} />
+                <button
+                  type="submit"
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border ${task.status === 'completed' ? 'border-[var(--accent)] bg-[var(--accent)] text-white' : 'border-[var(--border)] bg-white text-[var(--muted)]'}`}
+                  aria-label={task.status === 'completed' ? '标记为未完成' : '标记为已完成'}
+                >
+                  {task.status === 'completed' ? <CheckCircle2 size={16} /> : <Circle size={14} />}
+                </button>
+              </form>
               <div className="min-w-0 flex-1">
                 <div className={`text-sm ${task.status === 'completed' ? 'text-[var(--muted)] line-through' : 'text-[var(--foreground)]'}`}>{task.title}</div>
                 <div className="mt-1 text-xs text-[var(--muted)]">
                   {sourceTypeLabel(task.source_type)} {task.projects?.name ? `· ${task.projects.name}` : ''}
                 </div>
               </div>
-            </form>
+              {task.is_temporary ? (
+                <form action={deleteDailyTask}>
+                  <input type="hidden" name="taskId" value={task.id} />
+                  <button type="submit" className="rounded-full p-2 text-[var(--muted)] transition hover:bg-red-50 hover:text-[var(--danger)]" aria-label="删除临时任务">
+                    <Trash2 size={15} />
+                  </button>
+                </form>
+              ) : null}
+            </div>
           ))
         )}
       </div>
@@ -210,7 +224,7 @@ export function TaskTemplateManager({ projects, templates }: { projects: Project
       <div className="space-y-4">
         {templates.map((template) => (
           <Card key={template.id} className="legacy-card-hover rounded-[24px] p-5">
-            <div className="flex items-start justify-between gap-4">
+            <div className="mb-4 flex items-start justify-between gap-4 border-b border-[var(--border)] pb-4">
               <div>
                 <div className="text-base font-medium text-[var(--foreground)]">{template.title}</div>
                 <div className="mt-2 text-sm text-[var(--muted)]">
@@ -219,9 +233,50 @@ export function TaskTemplateManager({ projects, templates }: { projects: Project
                   {template.scheduled_date ? ` · ${template.scheduled_date}` : ''}
                 </div>
               </div>
-              <div className="rounded-full border border-[var(--border)] px-3 py-1 text-xs text-[var(--muted)]">
+              <div className={`rounded-full px-3 py-1 text-xs font-semibold ${template.is_active ? 'bg-[rgba(102,126,234,0.1)] text-[var(--accent)]' : 'bg-slate-100 text-slate-500'}`}>
                 {template.is_active ? '启用中' : '已停用'}
               </div>
+            </div>
+
+            <form action={updateTaskTemplate} className="grid gap-3 lg:grid-cols-[1.2fr_0.9fr_0.9fr_0.8fr_auto] lg:items-center">
+              <input type="hidden" name="id" value={template.id} />
+              <Input name="title" defaultValue={template.title} placeholder="任务标题" required />
+              <select
+                name="sourceType"
+                defaultValue={template.source_type}
+                className="h-11 rounded-2xl border border-[var(--border)] bg-white/80 px-4 text-sm outline-none focus:border-[var(--accent)]"
+                required
+              >
+                <option value="fixed">固定任务</option>
+                <option value="project_daily">项目每日任务</option>
+                <option value="project_once">项目指定日期任务</option>
+              </select>
+              <select
+                name="projectId"
+                defaultValue={template.project_id ?? ''}
+                className="h-11 rounded-2xl border border-[var(--border)] bg-white/80 px-4 text-sm outline-none focus:border-[var(--accent)]"
+              >
+                <option value="">不绑定项目</option>
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+              <Input type="date" name="scheduledDate" defaultValue={template.scheduled_date ?? ''} />
+              <Button variant="secondary">保存</Button>
+            </form>
+
+            <div className="mt-3 flex flex-wrap justify-end gap-2">
+              <form action={toggleTaskTemplateActive}>
+                <input type="hidden" name="id" value={template.id} />
+                <input type="hidden" name="nextActive" value={template.is_active ? 'false' : 'true'} />
+                <Button variant="secondary">{template.is_active ? '停用' : '启用'}</Button>
+              </form>
+              <form action={deleteTaskTemplate}>
+                <input type="hidden" name="id" value={template.id} />
+                <Button variant="danger"><Trash2 size={16} />删除</Button>
+              </form>
             </div>
           </Card>
         ))}
