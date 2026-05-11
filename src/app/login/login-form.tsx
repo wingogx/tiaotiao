@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { HelpCircle, Lock, Mail, X } from 'lucide-react';
+import { ArrowLeft, BookOpen, HelpCircle, Lock, Mail } from 'lucide-react';
 
 import { signInWithMagicLink } from '@/app/actions';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
@@ -47,73 +47,85 @@ export function LoginForm() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#06110d] px-4 py-8 text-slate-100">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(58,190,158,0.24),transparent_34%),linear-gradient(180deg,#06110d_0%,#10231d_50%,#1c3027_100%)]" />
-      <div className="pointer-events-none absolute left-[-12rem] top-[22%] h-[28rem] w-[28rem] rounded-full bg-emerald-500/10 blur-[150px]" />
-      <div className="pointer-events-none absolute bottom-[-10rem] right-[-10rem] h-[32rem] w-[32rem] rounded-full bg-amber-400/10 blur-[150px]" />
-
-      <main className="relative mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-[520px] items-center">
-        <Card className="w-full rounded-[34px] border-white/10 bg-[#14241d]/88 p-7 text-white shadow-[0_28px_90px_rgba(0,0,0,0.42)] backdrop-blur-2xl md:p-9">
-          <Link
-            href="/"
-            className="ml-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-white/8 text-white/60 transition hover:bg-white/14 hover:text-white"
-            aria-label="回到首页"
-          >
-            <X size={18} />
-          </Link>
-
-          <div className="mt-2 text-center">
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-emerald-300/35 bg-[radial-gradient(circle_at_35%_24%,rgba(45,212,191,0.42),rgba(15,42,32,0.92)_58%)] text-3xl shadow-[0_0_34px_rgba(45,212,191,0.22)]">
-              10
-            </div>
-            <p className="mt-7 text-[12px] font-semibold uppercase tracking-[0.35em] text-emerald-300/75">Member Access</p>
-            <h1 className="serif-heading mt-3 text-3xl font-bold tracking-[0.04em] text-emerald-100">登录 1000 天实盘</h1>
-            <p className="mt-3 text-sm leading-7 text-slate-300/78">管理员用密码登录；普通会员可以注册账号，等待后台开通文章正文权限。</p>
+    <div className="min-h-screen bg-[#f2eee5] text-[#1f2a28]">
+      <main className="grid min-h-screen lg:grid-cols-[0.9fr_1.1fr]">
+        <section className="relative hidden overflow-hidden bg-[#22322f] px-12 py-10 text-white lg:flex lg:flex-col lg:justify-between">
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),transparent_32%),radial-gradient(circle_at_22%_18%,rgba(228,176,92,0.22),transparent_28%),radial-gradient(circle_at_80%_75%,rgba(97,161,140,0.28),transparent_34%)]" />
+          <div className="relative flex items-center gap-3 text-sm text-white/72">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#e8b45b] font-semibold text-[#1f2a28]">10</div>
+            <div>1000天赚1000万</div>
           </div>
+          <div className="relative max-w-xl">
+            <p className="text-xs uppercase tracking-[0.28em] text-[#e8b45b]">Private Journal</p>
+            <h1 className="serif-heading mt-5 text-6xl leading-tight">真实记录，不做表演。</h1>
+            <p className="mt-6 text-lg leading-9 text-white/72">登录后进入会员内容和后台。所有收入、任务、文章都围绕每日复盘整理，重点是长期可持续。</p>
+          </div>
+          <div className="relative grid grid-cols-3 gap-3 text-sm text-white/70">
+            <div className="rounded-2xl border border-white/10 bg-white/8 p-4">公开首页</div>
+            <div className="rounded-2xl border border-white/10 bg-white/8 p-4">会员文章</div>
+            <div className="rounded-2xl border border-white/10 bg-white/8 p-4">后台录入</div>
+          </div>
+        </section>
 
-          <div className="mt-8 grid grid-cols-3 gap-1 rounded-[1.1rem] border border-white/10 bg-black/24 p-1">
+        <section className="flex items-center justify-center px-5 py-8">
+          <Card className="w-full max-w-[520px] rounded-[28px] border-[#d8d0c0] bg-[#fffdf7] p-6 shadow-[0_24px_70px_rgba(49,45,35,0.12)] md:p-8">
+            <Link href="/" className="inline-flex items-center gap-2 text-sm font-medium text-[#66706b] transition hover:text-[#1f2a28]">
+              <ArrowLeft size={16} />
+              返回首页
+            </Link>
+
+            <div className="mt-8">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#22322f] text-[#f7d38a]">
+                <BookOpen size={22} />
+              </div>
+              <p className="mt-7 text-xs font-semibold uppercase tracking-[0.24em] text-[#9b7142]">Member Access</p>
+              <h1 className="serif-heading mt-3 text-4xl font-semibold text-[#1f2a28]">登录实盘记录</h1>
+              <p className="mt-3 text-sm leading-7 text-[#66706b]">管理员用密码登录；普通会员可注册账号，等待后台开通文章正文权限。</p>
+            </div>
+
+          <div className="mt-8 grid grid-cols-3 gap-1 rounded-2xl border border-[#ded6c7] bg-[#eee8dc] p-1">
             <button
               type="button"
               onClick={() => setMode('password')}
-              className={`flex h-11 items-center justify-center gap-2 rounded-[0.9rem] text-sm font-semibold transition ${mode === 'password' ? 'bg-emerald-300/16 text-emerald-200' : 'text-slate-400 hover:text-emerald-100'}`}
+              className={`flex h-11 items-center justify-center gap-2 rounded-xl text-sm font-semibold transition ${mode === 'password' ? 'bg-[#22322f] text-white shadow-sm' : 'text-[#66706b] hover:text-[#1f2a28]'}`}
             >
               <Lock size={16} />
               登录
             </button>
-            <Link className="flex h-11 items-center justify-center gap-2 rounded-[0.9rem] text-sm font-semibold text-slate-400 transition hover:text-emerald-100" href="/register">
+            <Link className="flex h-11 items-center justify-center gap-2 rounded-xl text-sm font-semibold text-[#66706b] transition hover:text-[#1f2a28]" href="/register">
               <Mail size={16} />
               注册
             </Link>
             <button
               type="button"
               onClick={() => setMode('magic')}
-              className={`flex h-11 items-center justify-center gap-2 rounded-[0.9rem] text-sm font-semibold transition ${mode === 'magic' ? 'bg-emerald-300/16 text-emerald-200' : 'text-slate-400 hover:text-emerald-100'}`}
+              className={`flex h-11 items-center justify-center gap-2 rounded-xl text-sm font-semibold transition ${mode === 'magic' ? 'bg-[#22322f] text-white shadow-sm' : 'text-[#66706b] hover:text-[#1f2a28]'}`}
             >
               <HelpCircle size={16} />
               链接
             </button>
           </div>
 
-          {error ? <div className="mt-5 rounded-2xl border border-red-400/25 bg-red-950/35 px-4 py-3 text-sm text-red-100">{error}</div> : null}
-          {sent ? <div className="mt-5 rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">登录链接已发送，请查收邮箱。</div> : null}
+          {error ? <div className="mt-5 rounded-2xl border border-[#d9a38d] bg-[#fff1ea] px-4 py-3 text-sm text-[#8c3e21]">{error}</div> : null}
+          {sent ? <div className="mt-5 rounded-2xl border border-[#9fcbb7] bg-[#eef8f2] px-4 py-3 text-sm text-[#255f47]">登录链接已发送，请查收邮箱。</div> : null}
 
           {mode === 'password' ? (
             <form className="mt-7 space-y-5" onSubmit={handlePasswordLogin}>
               <div>
                 <label className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-200" htmlFor="login-email">
-                  <Mail size={16} className="text-emerald-300" />
+                  <Mail size={16} className="text-[#9b7142]" />
                   邮箱
                 </label>
-                <Input id="login-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="border-white/10 bg-black/24 text-white placeholder:text-slate-500" />
+                <Input id="login-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="border-[#ded6c7] bg-[#f7f2e8] text-[#1f2a28] placeholder:text-[#8f938d]" />
               </div>
               <div>
-                <label className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-200" htmlFor="login-password">
-                  <Lock size={16} className="text-emerald-300" />
+                <label className="mb-3 flex items-center gap-2 text-sm font-semibold text-[#34413d]" htmlFor="login-password">
+                  <Lock size={16} className="text-[#9b7142]" />
                   密码
                 </label>
-                <Input id="login-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="输入密码" className="border-white/10 bg-black/24 text-white placeholder:text-slate-500" />
+                <Input id="login-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="输入密码" className="border-[#ded6c7] bg-[#f7f2e8] text-[#1f2a28] placeholder:text-[#8f938d]" />
               </div>
-              <Button fullWidth disabled={isSubmitting} className="h-12 rounded-2xl bg-[linear-gradient(135deg,#34d399_0%,#0f766e_100%)] text-base font-bold text-white hover:brightness-110">
+              <Button fullWidth disabled={isSubmitting} className="h-12 rounded-2xl bg-[#22322f] text-base font-bold text-white hover:bg-[#304640]">
                 {isSubmitting ? '登录中...' : '邮箱密码登录'}
               </Button>
             </form>
@@ -121,16 +133,17 @@ export function LoginForm() {
             <form action={signInWithMagicLink} className="mt-7 space-y-5">
               <input type="hidden" name="next" value="/articles" />
               <div>
-                <label className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-200" htmlFor="magic-email">
-                  <Mail size={16} className="text-emerald-300" />
+                <label className="mb-3 flex items-center gap-2 text-sm font-semibold text-[#34413d]" htmlFor="magic-email">
+                  <Mail size={16} className="text-[#9b7142]" />
                   邮箱链接登录
                 </label>
-                <Input id="magic-email" name="email" type="email" placeholder="输入邮箱地址" required className="border-white/10 bg-black/24 text-white placeholder:text-slate-500" />
+                <Input id="magic-email" name="email" type="email" placeholder="输入邮箱地址" required className="border-[#ded6c7] bg-[#f7f2e8] text-[#1f2a28] placeholder:text-[#8f938d]" />
               </div>
-              <Button fullWidth variant="secondary" className="h-12 rounded-2xl border-white/10 bg-white/8 text-white hover:bg-white/14">发送登录链接</Button>
+              <Button fullWidth variant="secondary" className="h-12 rounded-2xl border-[#ded6c7] bg-[#f7f2e8] text-[#1f2a28] hover:bg-[#efe7d8]">发送登录链接</Button>
             </form>
           )}
         </Card>
+        </section>
       </main>
     </div>
   );
