@@ -32,9 +32,14 @@ export async function SiteHeader() {
               <Button variant="secondary">{viewer.isAdmin ? '进入后台' : '进入会员区'}</Button>
             </Link>
           ) : (
-            <Link href="/login">
-              <Button>会员登录</Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/login">
+                <Button variant="secondary">登录</Button>
+              </Link>
+              <Link href="/register" className="hidden sm:block">
+                <Button>注册</Button>
+              </Link>
+            </div>
           )}
         </div>
       </div>

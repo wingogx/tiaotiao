@@ -1,6 +1,7 @@
 import type { DailyTask, Project, TaskTemplate } from '@/lib/data/queries';
 
 import {
+  adminCreateUser,
   closeProject,
   createIncomeRecord,
   createPost,
@@ -214,7 +215,50 @@ export function TaskTemplateManager({ projects, templates }: { projects: Project
 
 export function UserRoleManager({ profiles }: { profiles: Array<{ id: string; email: string; role: string; can_view_articles: boolean }> }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <Card className="rounded-[30px] p-5">
+        <div className="mb-4 text-lg font-semibold text-[var(--foreground)]">创建用户</div>
+        <form action={adminCreateUser} className="grid gap-3 lg:grid-cols-[1fr_1fr_1fr_0.8fr_0.8fr_auto]">
+          <Input name="email" type="email" placeholder="邮箱" required />
+          <Input name="password" type="password" placeholder="初始密码" required />
+          <Input name="displayName" placeholder="昵称，可选" />
+          <select
+            name="role"
+            defaultValue="member"
+            className="h-11 rounded-2xl border border-[var(--border)] bg-white/80 px-4 text-sm outline-none focus:border-[var(--accent)]"
+          >
+            <option value="guest">guest</option>
+            <option value="member">member</option>
+            <option value="admin">admin</option>
+          </select>
+          <select
+            name="canViewArticles"
+            defaultValue="true"
+            className="h-11 rounded-2xl border border-[var(--border)] bg-white/80 px-4 text-sm outline-none focus:border-[var(--accent)]"
+          >
+            <option value="false">文章不可见</option>
+            <option value="true">文章可见</option>
+          </select>
+          <Button>创建</Button>
+        </form>
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="rounded-[24px] p-5">
+          <div className="text-sm text-[var(--muted)]">总用户</div>
+          <div className="serif-heading mt-2 text-3xl">{profiles.length}</div>
+        </Card>
+        <Card className="rounded-[24px] p-5">
+          <div className="text-sm text-[var(--muted)]">会员</div>
+          <div className="serif-heading mt-2 text-3xl">{profiles.filter((item) => item.role === 'member').length}</div>
+        </Card>
+        <Card className="rounded-[24px] p-5">
+          <div className="text-sm text-[var(--muted)]">可看正文</div>
+          <div className="serif-heading mt-2 text-3xl">{profiles.filter((item) => item.can_view_articles).length}</div>
+        </Card>
+      </div>
+
+      <div className="space-y-4">
       {profiles.map((profile) => (
         <Card key={profile.id} className="rounded-[28px] p-5">
           <form action={updateProfileRole} className="grid gap-3 lg:grid-cols-[1.3fr_0.7fr_0.7fr_auto] lg:items-center">
@@ -247,6 +291,7 @@ export function UserRoleManager({ profiles }: { profiles: Array<{ id: string; em
           </form>
         </Card>
       ))}
+      </div>
     </div>
   );
 }

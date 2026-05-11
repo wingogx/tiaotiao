@@ -48,16 +48,20 @@ const userRoleSchema = z.object({
   canViewArticles: z.enum(['true', 'false']),
 });
 
-const passwordLoginSchema = z.object({
+const registerSchema = z.object({
+  displayName: z.string().min(1, '昵称不能为空'),
   email: z.string().email('请输入有效邮箱'),
   password: z.string().min(8, '密码至少 8 位'),
-  next: z.string().optional(),
+  agreed: z.literal('true', { error: '请先确认注册说明' }),
 });
 
-const loginErrorMap: Record<string, string> = {
-  invalid_credentials: '邮箱或密码不正确',
-  email_not_confirmed: '邮箱还没有完成确认',
-};
+const adminCreateUserSchema = z.object({
+  email: z.string().email('请输入有效邮箱'),
+  password: z.string().min(8, '密码至少 8 位'),
+  displayName: z.string().optional(),
+  role: z.enum(['guest', 'member', 'admin']),
+  canViewArticles: z.enum(['true', 'false']),
+});
 
 export async function signInWithMagicLink(formData: FormData) {
   const email = String(formData.get('email') ?? '').trim();
@@ -78,30 +82,45 @@ export async function signInWithMagicLink(formData: FormData) {
   redirect(`/login?sent=1&email=${encodeURIComponent(email)}`);
 }
 
-export async function signInWithPassword(formData: FormData) {
-  const parsed = passwordLoginSchema.safeParse({
+export async function registerUser(formData: FormData) {
+  const parsed = registerSchema.safeParse({
+    displayName: formData.get('displayName'),
     email: formData.get('email'),
     password: formData.get('password'),
-    next: formData.get('next'),
+    agreed: formData.get('agreed'),
   });
 
   if (!parsed.success) {
-    redirect(`/login?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? '登录信息不正确')}`);
+    redirect(`/register?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? '注册信息不正确')}`);
   }
 
-  const next = parsed.data.next || '/app/today';
   const service = createServiceRoleClient();
-  const { error } = await service.auth.signInWithPassword({
+  const { data, error } = await service.auth.admin.createUser({
     email: parsed.data.email,
     password: parsed.data.password,
+    email_confirm: true,
+    user_metadata: {
+      display_name: parsed.data.displayName,
+    },
   });
 
   if (error) {
-    const message = loginErrorMap[error.code ?? ''] ?? '登录失败，请检查邮箱或密码';
-    redirect(`/login?error=${encodeURIComponent(message)}`);
+    const message = error.message.includes('already') ? '这个邮箱已经注册过了' : error.message;
+    redirect(`/register?error=${encodeURIComponent(message)}`);
   }
 
-  redirect(next);
+  const userId = data.user?.id;
+  if (userId) {
+    await service.from('profiles').upsert({
+      id: userId,
+      email: parsed.data.email,
+      display_name: parsed.data.displayName,
+      role: 'guest',
+      can_view_articles: false,
+    });
+  }
+
+  redirect(`/register?success=${encodeURIComponent('账号已创建，请返回登录页登录。管理员开通后即可查看会员内容。')}`);
 }
 
 export async function signOut() {
@@ -335,6 +354,53 @@ export async function updateProfileRole(formData: FormData) {
 
   if (error) {
     throw new Error(`更新用户权限失败：${error.message}`);
+  }
+
+  revalidatePath('/app/users');
+}
+
+export async function adminCreateUser(formData: FormData) {
+  await requireAdmin();
+
+  const parsed = adminCreateUserSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+    displayName: formData.get('displayName'),
+    role: formData.get('role'),
+    canViewArticles: formData.get('canViewArticles'),
+  });
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? '用户信息不正确');
+  }
+
+  const service = createServiceRoleClient();
+  const { data, error } = await service.auth.admin.createUser({
+    email: parsed.data.email,
+    password: parsed.data.password,
+    email_confirm: true,
+    user_metadata: {
+      display_name: parsed.data.displayName || parsed.data.email,
+    },
+  });
+
+  if (error) {
+    throw new Error(`创建用户失败：${error.message}`);
+  }
+
+  const userId = data.user?.id;
+  if (userId) {
+    const { error: profileError } = await service.from('profiles').upsert({
+      id: userId,
+      email: parsed.data.email,
+      display_name: parsed.data.displayName || null,
+      role: parsed.data.role,
+      can_view_articles: parsed.data.canViewArticles === 'true',
+    });
+
+    if (profileError) {
+      throw new Error(`创建用户资料失败：${profileError.message}`);
+    }
   }
 
   revalidatePath('/app/users');
