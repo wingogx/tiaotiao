@@ -193,7 +193,7 @@ export function TaskTemplateManager({ projects, templates }: { projects: Project
   return (
     <div className="grid gap-6 xl:grid-cols-[0.86fr_1.14fr]">
       <Card className="legacy-card-hover rounded-[26px] p-5">
-        <PanelTitle icon={<CheckCircle2 size={19} />} title="新增任务模板" description="固定任务每天生成；项目任务可每天生成，也可指定日期生成。" />
+        <PanelTitle icon={<CheckCircle2 size={19} />} title="新增任务模板" description="固定/项目每日任务按起止日期生成；指定日期任务只在指定日期生成。" />
         <form action={createTaskTemplate} className="space-y-3">
           <Input name="title" placeholder="任务标题" required />
           <select
@@ -216,7 +216,12 @@ export function TaskTemplateManager({ projects, templates }: { projects: Project
               </option>
             ))}
           </select>
-          <Input type="date" name="scheduledDate" />
+          <div className="grid gap-3 md:grid-cols-2">
+            <Input type="date" name="startDate" aria-label="开始日期" />
+            <Input type="date" name="endDate" aria-label="结束日期" />
+          </div>
+          <Input type="date" name="scheduledDate" aria-label="指定日期任务日期" />
+          <div className="text-xs leading-6 text-[var(--muted)]">固定/项目每日任务填写开始和结束日期；项目指定日期任务填写最后一个日期。</div>
           <Button fullWidth>保存模板</Button>
         </form>
       </Card>
@@ -230,6 +235,7 @@ export function TaskTemplateManager({ projects, templates }: { projects: Project
                 <div className="mt-2 text-sm text-[var(--muted)]">
                   {sourceTypeLabel(template.source_type)}
                   {template.projects?.name ? ` · ${template.projects.name}` : ''}
+                  {template.start_date || template.end_date ? ` · ${template.start_date ?? '不限开始'} 至 ${template.end_date ?? '不限结束'}` : ''}
                   {template.scheduled_date ? ` · ${template.scheduled_date}` : ''}
                 </div>
               </div>
@@ -238,7 +244,7 @@ export function TaskTemplateManager({ projects, templates }: { projects: Project
               </div>
             </div>
 
-            <form action={updateTaskTemplate} className="grid gap-3 lg:grid-cols-[1.2fr_0.9fr_0.9fr_0.8fr_auto] lg:items-center">
+            <form action={updateTaskTemplate} className="grid gap-3 lg:grid-cols-[1.1fr_0.9fr_0.9fr] xl:grid-cols-[1.1fr_0.85fr_0.85fr_0.75fr_0.75fr_0.75fr_auto] xl:items-center">
               <input type="hidden" name="id" value={template.id} />
               <Input name="title" defaultValue={template.title} placeholder="任务标题" required />
               <select
@@ -263,7 +269,9 @@ export function TaskTemplateManager({ projects, templates }: { projects: Project
                   </option>
                 ))}
               </select>
-              <Input type="date" name="scheduledDate" defaultValue={template.scheduled_date ?? ''} />
+              <Input type="date" name="startDate" defaultValue={template.start_date ?? ''} aria-label="开始日期" />
+              <Input type="date" name="endDate" defaultValue={template.end_date ?? ''} aria-label="结束日期" />
+              <Input type="date" name="scheduledDate" defaultValue={template.scheduled_date ?? ''} aria-label="指定日期任务日期" />
               <Button variant="secondary">保存</Button>
             </form>
 

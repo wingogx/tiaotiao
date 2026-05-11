@@ -47,6 +47,8 @@ export type TaskTemplate = {
   id: string;
   title: string;
   source_type: 'fixed' | 'project_daily' | 'project_once';
+  start_date: string | null;
+  end_date: string | null;
   scheduled_date: string | null;
   is_active: boolean;
   project_id: string | null;
@@ -118,7 +120,7 @@ export async function getTaskTemplates() {
   const service = createServiceRoleClient();
   const { data, error } = await service
     .from('task_templates')
-    .select('id, title, source_type, scheduled_date, is_active, project_id, projects(name)')
+    .select('id, title, source_type, start_date, end_date, scheduled_date, is_active, project_id, projects(name)')
     .order('created_at', { ascending: false })
     .returns<TaskTemplate[]>();
 

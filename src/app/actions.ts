@@ -23,6 +23,8 @@ const taskTemplateSchema = z.object({
   title: z.string().min(1, '任务标题不能为空'),
   sourceType: z.enum(['fixed', 'project_daily', 'project_once']),
   projectId: z.string().uuid().optional().or(z.literal('')),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
   scheduledDate: z.string().optional(),
 });
 
@@ -256,6 +258,8 @@ export async function createTaskTemplate(formData: FormData) {
     title: formData.get('title'),
     sourceType: formData.get('sourceType'),
     projectId: formData.get('projectId'),
+    startDate: formData.get('startDate'),
+    endDate: formData.get('endDate'),
     scheduledDate: formData.get('scheduledDate'),
   });
 
@@ -263,6 +267,8 @@ export async function createTaskTemplate(formData: FormData) {
     title: parsed.title,
     source_type: parsed.sourceType,
     project_id: parsed.projectId || null,
+    start_date: parsed.sourceType === 'project_once' ? null : parsed.startDate || null,
+    end_date: parsed.sourceType === 'project_once' ? null : parsed.endDate || null,
     scheduled_date: parsed.sourceType === 'project_once' ? parsed.scheduledDate || null : null,
   });
 
@@ -282,6 +288,8 @@ export async function updateTaskTemplate(formData: FormData) {
     title: formData.get('title'),
     sourceType: formData.get('sourceType'),
     projectId: formData.get('projectId'),
+    startDate: formData.get('startDate'),
+    endDate: formData.get('endDate'),
     scheduledDate: formData.get('scheduledDate'),
   });
 
@@ -291,6 +299,8 @@ export async function updateTaskTemplate(formData: FormData) {
       title: parsed.title,
       source_type: parsed.sourceType,
       project_id: parsed.projectId || null,
+      start_date: parsed.sourceType === 'project_once' ? null : parsed.startDate || null,
+      end_date: parsed.sourceType === 'project_once' ? null : parsed.endDate || null,
       scheduled_date: parsed.sourceType === 'project_once' ? parsed.scheduledDate || null : null,
     })
     .eq('id', parsed.id);
