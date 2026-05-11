@@ -12,7 +12,7 @@ const items = [
   { href: '/app/tasks', label: '任务跟踪', icon: ClipboardList },
   { href: '/app/progress', label: '完成进度', icon: BarChart3 },
   { href: '/app/income', label: '收入情况', icon: Coins },
-  { href: '/articles', label: '每日文章', icon: FileText },
+  { href: '/app/articles', label: '每日文章', icon: FileText },
   { href: '/app/users', label: '用户权限', icon: ShieldCheck },
 ];
 

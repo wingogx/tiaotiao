@@ -6,11 +6,11 @@ import { formatDate } from '@/lib/utils/format';
 
 import { Card } from '@/components/ui/card';
 
-export function PostList({ posts }: { posts: DailyPost[] }) {
+export function PostList({ posts, basePath = '/articles' }: { posts: DailyPost[]; basePath?: string }) {
   return (
     <div className="grid gap-5">
       {posts.map((post) => (
-        <Link key={post.id} href={`/articles/${post.slug}`}>
+        <Link key={post.id} href={`${basePath}/${post.slug}`}>
           <Card className="grid gap-5 rounded-[30px] p-4 md:grid-cols-[240px_1fr] md:p-5">
             <div className="relative h-56 overflow-hidden rounded-[24px] bg-[linear-gradient(135deg,#0f6b5a,#1e352d)]">
               {post.cover_url ? (

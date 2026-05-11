@@ -27,7 +27,7 @@ export async function SiteHeader() {
           <Link href="/app/tasks">任务跟踪</Link>
           <Link href="/app/progress">完成进度</Link>
           <Link href="/app/income">收入情况</Link>
-          <Link href="/articles">每日文章</Link>
+          <Link href={viewer.isAdmin ? '/app/articles' : '/articles'}>每日文章</Link>
           {viewer.isAdmin ? <Link href="/app/today">今日录入</Link> : null}
         </nav>
 
