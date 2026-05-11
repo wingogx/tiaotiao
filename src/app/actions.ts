@@ -48,6 +48,17 @@ const userRoleSchema = z.object({
   canViewArticles: z.enum(['true', 'false']),
 });
 
+const passwordLoginSchema = z.object({
+  email: z.string().email('请输入有效邮箱'),
+  password: z.string().min(8, '密码至少 8 位'),
+  next: z.string().optional(),
+});
+
+const loginErrorMap: Record<string, string> = {
+  invalid_credentials: '邮箱或密码不正确',
+  email_not_confirmed: '邮箱还没有完成确认',
+};
+
 export async function signInWithMagicLink(formData: FormData) {
   const email = String(formData.get('email') ?? '').trim();
   const next = String(formData.get('next') ?? '/articles');
@@ -61,10 +72,36 @@ export async function signInWithMagicLink(formData: FormData) {
   });
 
   if (error) {
-    throw new Error(`登录邮件发送失败：${error.message}`);
+    redirect(`/login?error=${encodeURIComponent(`登录邮件发送失败：${error.message}`)}`);
   }
 
   redirect(`/login?sent=1&email=${encodeURIComponent(email)}`);
+}
+
+export async function signInWithPassword(formData: FormData) {
+  const parsed = passwordLoginSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+    next: formData.get('next'),
+  });
+
+  if (!parsed.success) {
+    redirect(`/login?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? '登录信息不正确')}`);
+  }
+
+  const next = parsed.data.next || '/app/today';
+  const service = createServiceRoleClient();
+  const { error } = await service.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  });
+
+  if (error) {
+    const message = loginErrorMap[error.code ?? ''] ?? '登录失败，请检查邮箱或密码';
+    redirect(`/login?error=${encodeURIComponent(message)}`);
+  }
+
+  redirect(next);
 }
 
 export async function signOut() {
