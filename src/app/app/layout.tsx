@@ -11,7 +11,7 @@ export default async function AppLayout({ children }: PropsWithChildren) {
   return (
     <div className="min-h-screen pb-12">
       <SiteHeader />
-      <main className="mx-auto grid w-[min(1320px,calc(100vw-32px))] gap-6 py-6 lg:grid-cols-[258px_minmax(0,1fr)] lg:py-8">
+      <main className="page-shell grid gap-5 py-5 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-6 lg:py-8">
         <AppSidebar />
         <div className="min-w-0 space-y-6">{children}</div>
       </main>
