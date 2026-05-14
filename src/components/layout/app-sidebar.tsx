@@ -20,14 +20,14 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="glass-panel hidden min-h-[calc(100vh-112px)] overflow-hidden rounded-[28px] p-0 lg:block">
-      <div className="legacy-gradient px-5 py-6 text-white">
+    <aside className="glass-panel sticky top-24 hidden max-h-[calc(100vh-112px)] overflow-hidden rounded-[26px] p-0 lg:block">
+      <div className="legacy-gradient px-5 py-5 text-white">
         <div className="text-xs uppercase tracking-[0.2em] text-white/64">Admin Console</div>
         <div className="serif-heading mt-2 text-2xl">实盘录入后台</div>
         <div className="mt-2 text-xs leading-6 text-white/68">收入、任务、文章每天轻量录入。</div>
       </div>
 
-      <nav className="space-y-2 p-4">
+      <nav className="space-y-1.5 p-3">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -37,7 +37,7 @@ export function AppSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 rounded-[18px] px-4 py-3 text-sm transition',
+                'flex items-center gap-3 rounded-[16px] px-4 py-3 text-sm transition',
                 isActive
                   ? 'legacy-gradient text-white shadow-lg shadow-indigo-900/12'
                   : 'text-[var(--foreground)]/78 hover:bg-white/80',

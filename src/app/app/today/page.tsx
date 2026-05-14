@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { CalendarCheck, CheckCircle2, Coins, FileText } from 'lucide-react';
 
+import { AdminPanel } from '@/components/app/admin-ui';
 import { TodayIncomeForm, TodayPostForm, TodayTaskList } from '@/components/app/forms';
-import { Card } from '@/components/ui/card';
 import { getTodayConsoleData } from '@/lib/data/queries';
 import { formatCurrency, formatPercent } from '@/lib/utils/format';
 
@@ -50,11 +50,11 @@ export default async function TodayPage() {
 
 function ConsoleStat({ icon, label, value, muted }: { icon: ReactNode; label: string; value: string; muted: string }) {
   return (
-    <Card className="legacy-card-hover rounded-[24px] p-5">
+    <AdminPanel>
       <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[rgba(102,126,234,0.1)] text-[var(--accent)]">{icon}</div>
       <div className="text-sm text-[var(--muted)]">{label}</div>
       <div className="mt-2 truncate text-2xl font-semibold text-[var(--foreground)]">{value}</div>
       <div className="mt-2 truncate text-xs text-[var(--muted)]">{muted}</div>
-    </Card>
+    </AdminPanel>
   );
 }

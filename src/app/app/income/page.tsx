@@ -1,6 +1,6 @@
 import { TodayIncomeForm } from '@/components/app/forms';
+import { AdminPanel, EmptyState, PanelHeading } from '@/components/app/admin-ui';
 import { SectionHeader } from '@/components/app/section-header';
-import { Card } from '@/components/ui/card';
 import { getIncomeRecords, getProjects } from '@/lib/data/queries';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
 
@@ -24,11 +24,11 @@ export default async function IncomePage() {
       <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
         <TodayIncomeForm projects={projects} />
 
-        <Card className="legacy-card-hover rounded-[26px] p-5">
-          <div className="mb-4 text-lg font-semibold text-[var(--foreground)]">最近收入记录</div>
+        <AdminPanel>
+          <PanelHeading title="最近收入记录" description="按创建时间倒序展示。金额为负数时保留真实记录，不单独记录成本。" />
           <div className="space-y-3">
             {records.length === 0 ? (
-              <div className="rounded-[20px] border border-dashed border-[var(--border)] px-4 py-5 text-sm text-[var(--muted)]">还没有收入数据。</div>
+              <EmptyState>还没有收入数据。</EmptyState>
             ) : (
               records.map((record) => (
                 <div key={record.id} className="grid gap-2 rounded-[18px] border border-[var(--border)] bg-white/74 px-4 py-4 transition hover:border-[rgba(102,126,234,0.35)] hover:bg-white md:grid-cols-[120px_1fr_auto] md:items-center">
@@ -44,7 +44,7 @@ export default async function IncomePage() {
               ))
             )}
           </div>
-        </Card>
+        </AdminPanel>
       </div>
     </div>
   );
@@ -52,10 +52,10 @@ export default async function IncomePage() {
 
 function IncomeStat({ label, value, muted }: { label: string; value: string; muted: string }) {
   return (
-    <Card className="legacy-card-hover rounded-[24px] p-5">
+    <AdminPanel>
       <div className="text-sm text-[var(--muted)]">{label}</div>
       <div className="serif-heading mt-2 text-3xl text-[var(--foreground)]">{value}</div>
       <div className="mt-2 text-xs text-[var(--muted)]">{muted}</div>
-    </Card>
+    </AdminPanel>
   );
 }

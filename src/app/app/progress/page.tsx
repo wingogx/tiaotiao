@@ -1,4 +1,4 @@
-import { Card } from '@/components/ui/card';
+import { AdminPanel } from '@/components/app/admin-ui';
 import { SectionHeader } from '@/components/app/section-header';
 import { getProgressData } from '@/lib/data/queries';
 import { formatCurrency, formatPercent } from '@/lib/utils/format';
@@ -22,7 +22,7 @@ export default async function ProgressPage() {
     <div className="space-y-6">
       <SectionHeader title="完成进度" description="这里聚合长期挑战的核心指标，只展示自动计算后的结果，不增加额外录入成本。" />
 
-      <Card className="legacy-gradient rounded-[28px] p-7 text-white">
+      <section className="legacy-gradient rounded-[28px] p-7 text-white shadow-[0_24px_70px_rgba(102,126,234,0.2)]">
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
           <div>
             <div className="text-xs uppercase tracking-[0.18em] text-white/64">Long Challenge</div>
@@ -35,14 +35,14 @@ export default async function ProgressPage() {
             <ProgressLine label="今日任务完成率" value={formatPercent(data.taskCompletionRate)} percent={data.taskCompletionRate} />
           </div>
         </div>
-      </Card>
+      </section>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {items.map(([label, value]) => (
-          <Card key={label} className="legacy-card-hover rounded-[24px] p-5">
+          <AdminPanel key={label}>
             <div className="text-sm text-[var(--muted)]">{label}</div>
             <div className="serif-heading mt-3 text-3xl text-[var(--foreground)]">{value}</div>
-          </Card>
+          </AdminPanel>
         ))}
       </div>
     </div>

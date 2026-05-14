@@ -9,11 +9,11 @@ export default async function AppLayout({ children }: PropsWithChildren) {
   await requireAdmin();
 
   return (
-    <div className="pb-16">
+    <div className="min-h-screen pb-12">
       <SiteHeader />
-      <main className="page-shell grid gap-6 py-8 lg:grid-cols-[260px_1fr]">
+      <main className="mx-auto grid w-[min(1320px,calc(100vw-32px))] gap-6 py-6 lg:grid-cols-[258px_minmax(0,1fr)] lg:py-8">
         <AppSidebar />
-        <div>{children}</div>
+        <div className="min-w-0 space-y-6">{children}</div>
       </main>
     </div>
   );
