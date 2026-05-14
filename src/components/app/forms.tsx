@@ -157,15 +157,25 @@ export function ProjectManagement({ projects, totals }: { projects: Project[]; t
                 </div>
               </div>
 
-              <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
-                <form action={updateProject} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+              <div className="grid gap-4">
+                <form action={updateProject} className="grid gap-3">
                   <input type="hidden" name="id" value={project.id} />
-                  <Input name="name" defaultValue={project.name} />
-                  <Input name="notes" defaultValue={project.notes ?? ''} placeholder="备注" />
-                  <Button variant="secondary">保存</Button>
+                  <div className="grid gap-3 md:grid-cols-[0.85fr_1.15fr]">
+                    <label className="grid gap-1.5 text-xs font-medium text-[var(--muted)]">
+                      项目名称
+                      <Input name="name" defaultValue={project.name} placeholder="项目名称" />
+                    </label>
+                    <label className="grid gap-1.5 text-xs font-medium text-[var(--muted)]">
+                      项目备注
+                      <Input name="notes" defaultValue={project.notes ?? ''} placeholder="项目备注" />
+                    </label>
+                  </div>
+                  <div className="flex justify-end">
+                    <Button variant="secondary">保存修改</Button>
+                  </div>
                 </form>
 
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[var(--border)] pt-4">
                   <div className="rounded-full border border-[var(--border)] bg-white/74 px-4 py-2 text-sm font-semibold text-[var(--foreground)]">
                     {formatCurrency(total)}
                   </div>
