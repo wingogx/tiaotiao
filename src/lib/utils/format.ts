@@ -9,6 +9,13 @@ export function formatCurrency(value: number) {
   }).format(value);
 }
 
+export function formatCompactCurrency(value: number) {
+  const abs = Math.abs(value);
+  if (abs >= 100000000) return `¥${(value / 100000000).toFixed(2)}亿`;
+  if (abs >= 10000) return `¥${(value / 10000).toFixed(0)}万`;
+  return formatCurrency(value);
+}
+
 export function formatPercent(value: number) {
   return `${value.toFixed(2)}%`;
 }

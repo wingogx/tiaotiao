@@ -1,4 +1,5 @@
-import { AdminPanel } from '@/components/app/admin-ui';
+import { AdminPanel, PanelHeading } from '@/components/app/admin-ui';
+import { RevenueCurve } from '@/components/app/revenue-curve';
 import { SectionHeader } from '@/components/app/section-header';
 import { getProgressData } from '@/lib/data/queries';
 import { formatCurrency, formatPercent } from '@/lib/utils/format';
@@ -36,6 +37,11 @@ export default async function ProgressPage() {
           </div>
         </div>
       </section>
+
+      <AdminPanel>
+        <PanelHeading title="收益曲线" description="按日期汇总收入，展示累计收益走势，用来快速看全貌。" />
+        <RevenueCurve data={data.revenueCurve} />
+      </AdminPanel>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {items.map(([label, value]) => (

@@ -311,6 +311,22 @@ export async function getProgressData() {
   const currentDay = getCurrentDayIndex(settings.start_date);
   const completedTasks = tasks.filter((item) => item.status === 'completed').length;
   const totalTasks = tasks.length;
+  const revenueByDate = new Map<string, number>();
+  incomeRecords.forEach((record) => {
+    revenueByDate.set(record.record_date, (revenueByDate.get(record.record_date) ?? 0) + Number(record.amount));
+  });
+
+  let runningRevenue = 0;
+  const revenueCurve = Array.from(revenueByDate.entries())
+    .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
+    .map(([date, amount]) => {
+      runningRevenue += amount;
+      return {
+        date,
+        amount,
+        total: runningRevenue,
+      };
+    });
 
   return {
     currentDay,
@@ -322,6 +338,7 @@ export async function getProgressData() {
     taskCompletionRate: totalTasks > 0 ? clampPercent((completedTasks / totalTasks) * 100) : 0,
     completedTasks,
     pendingTasks: totalTasks - completedTasks,
+    revenueCurve,
   };
 }
 

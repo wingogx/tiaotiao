@@ -8,7 +8,6 @@ import {
   createIncomeRecord,
   createPost,
   createProject,
-  createTaskTemplate,
   createTemporaryTask,
   deleteDailyTask,
   deleteProject,
@@ -22,6 +21,7 @@ import {
 import { formatCurrency } from '@/lib/utils/format';
 
 import { AdminPanel, EmptyState, Field, PanelHeading, StatusBadge, selectClassName } from '@/components/app/admin-ui';
+import { TaskTemplateCreateForm } from '@/components/app/task-template-create-form';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
 
@@ -201,33 +201,7 @@ export function TaskTemplateManager({ projects, templates }: { projects: Project
     <div className="grid gap-6 xl:grid-cols-[0.86fr_1.14fr]">
       <AdminPanel>
         <PanelHeading icon={<CheckCircle2 size={19} />} title="新增任务模板" description="固定/项目每日任务按起止日期生成；指定日期任务只在指定日期生成。" />
-        <form action={createTaskTemplate} className="space-y-3">
-          <Field label="任务标题"><Input name="title" placeholder="例如文章日更" required /></Field>
-          <Field label="任务类型">
-            <select name="sourceType" className={selectClassName} required>
-              <option value="fixed">固定任务</option>
-              <option value="project_daily">项目每日任务</option>
-              <option value="project_once">项目指定日期任务</option>
-            </select>
-          </Field>
-          <Field label="绑定项目">
-            <select name="projectId" className={selectClassName}>
-              <option value="">不绑定项目</option>
-              {projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <div className="grid gap-3 md:grid-cols-2">
-            <Field label="开始日期"><Input type="date" name="startDate" /></Field>
-            <Field label="结束日期"><Input type="date" name="endDate" /></Field>
-          </div>
-          <Field label="指定日期"><Input type="date" name="scheduledDate" /></Field>
-          <div className="text-xs leading-6 text-[var(--muted)]">固定/项目每日任务填写开始和结束日期；项目指定日期任务填写最后一个日期。</div>
-          <Button fullWidth>保存模板</Button>
-        </form>
+        <TaskTemplateCreateForm projects={projects} />
       </AdminPanel>
 
       <div className="space-y-4">

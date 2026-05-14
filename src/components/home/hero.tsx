@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { Activity, CalendarDays, Coins, Flag, FolderKanban, Target } from 'lucide-react';
 
 import type { AwaitedReturn } from '@/types/common';
-import { formatCurrency, formatPercent } from '@/lib/utils/format';
+import { formatCompactCurrency, formatCurrency, formatPercent } from '@/lib/utils/format';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -35,7 +35,7 @@ export function Hero({ data }: { data: DashboardData }) {
           </div>
 
           <div className="grid gap-4 md:grid-cols-4">
-            <MetricBox icon={<Target size={20} />} label="总目标" value={formatCurrency(settings.total_target)} muted="1000天终局" />
+            <MetricBox icon={<Target size={20} />} label="总目标" value={formatCompactCurrency(settings.total_target)} muted="1000天终局" />
             <MetricBox icon={<CalendarDays size={20} />} label="当前天数" value={`第 ${summary.currentDay} 天`} muted={`起始 ${settings.start_date}`} />
             <MetricBox icon={<Coins size={20} />} label="累计收入" value={formatCurrency(summary.totalRevenue)} muted={`今日 ${formatCurrency(summary.todayRevenue)}`} />
             <MetricBox icon={<FolderKanban size={20} />} label="活跃项目" value={`${summary.activeProjects} 个`} muted="并行收入来源" />
@@ -64,7 +64,7 @@ export function Hero({ data }: { data: DashboardData }) {
           <ProgressMetric label="收入进度" value={formatPercent(summary.incomeProgress)} percent={summary.incomeProgress} />
           <ProgressMetric label="时间进度" value={formatPercent(summary.timeProgress)} percent={summary.timeProgress} />
           <CompactMetric icon={<Activity size={17} />} label="剩余缺口" value={formatCurrency(summary.gapToGoal)} />
-          <CompactMetric icon={<Coins size={17} />} label="剩余日均需赚" value={formatCurrency(dailyTarget)} />
+          <CompactMetric icon={<Coins size={17} />} label="剩余日均目标" value={formatCurrency(dailyTarget)} muted="按剩余天数倒推需要达到的每日收入" />
         </div>
 
         <div className="rounded-[24px] border border-[var(--border)] bg-white/72 p-4">
@@ -82,17 +82,20 @@ function MetricBox({ icon, label, value, muted }: { icon: ReactNode; label: stri
   return (
     <div className="rounded-[22px] border border-white/12 bg-white/10 px-4 py-5 backdrop-blur-sm">
       <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-white/68">{icon}{label}</div>
-      <div className="mt-3 text-2xl font-semibold">{value}</div>
+      <div className="mt-3 break-words text-2xl font-semibold leading-tight">{value}</div>
       <div className="mt-2 text-sm text-white/62">{muted}</div>
     </div>
   );
 }
 
-function CompactMetric({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+function CompactMetric({ icon, label, value, muted }: { icon: ReactNode; label: string; value: string; muted?: string }) {
   return (
-    <div className="flex items-center justify-between rounded-[18px] border border-[var(--border)] bg-white/74 px-4 py-4">
-      <span className="flex items-center gap-2 text-sm text-[var(--muted)]">{icon}{label}</span>
-      <span className="text-base font-semibold text-[var(--foreground)]">{value}</span>
+    <div className="rounded-[18px] border border-[var(--border)] bg-white/74 px-4 py-4">
+      <div className="flex items-center justify-between gap-3">
+        <span className="flex items-center gap-2 text-sm text-[var(--muted)]">{icon}{label}</span>
+        <span className="text-base font-semibold text-[var(--foreground)]">{value}</span>
+      </div>
+      {muted ? <div className="mt-2 text-xs leading-5 text-[var(--muted)]">{muted}</div> : null}
     </div>
   );
 }
