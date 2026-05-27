@@ -24,7 +24,7 @@ export default async function ProgressPage() {
       <SectionHeader title="完成进度" description="这里聚合长期挑战的核心指标，只展示自动计算后的结果，不增加额外录入成本。" />
 
       <section className="legacy-gradient rounded-[28px] p-7 text-white shadow-[0_24px_70px_rgba(102,126,234,0.2)]">
-        <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <div className="grid gap-6 md:grid-cols-[1fr_1fr]">
           <div>
             <div className="text-xs uppercase tracking-[0.18em] text-white/64">Long Challenge</div>
             <h2 className="serif-heading mt-3 text-4xl">第 {data.currentDay} 天，还剩 {data.remainingDays} 天</h2>

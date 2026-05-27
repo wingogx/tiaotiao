@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { PostDetail } from '@/components/articles/post-detail';
-import { SiteHeader } from '@/components/layout/site-header';
+import { MobileAppShell } from '@/components/mobile/mobile-app-shell';
 import { getViewerAccess } from '@/lib/auth/session';
 import { getPostBySlug } from '@/lib/data/queries';
 
@@ -13,10 +13,11 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
     notFound();
   }
 
+  const accountLabel = viewer.profile?.display_name ?? viewer.profile?.email ?? '我';
+
   return (
-    <div className="pb-16">
-      <SiteHeader />
-      <PostDetail post={post} canViewContent={viewer.canViewArticles} />
-    </div>
+    <MobileAppShell accountLabel={accountLabel}>
+      <PostDetail post={post} canViewContent={viewer.canViewArticles} shell={false} />
+    </MobileAppShell>
   );
 }

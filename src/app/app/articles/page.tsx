@@ -9,7 +9,7 @@ export default async function AppArticlesPage() {
     <div>
       <SectionHeader
         title="每日文章"
-        description="后台内查看已发布文章。标题和摘要公开，正文权限仍按会员/管理员规则控制。"
+        description="查看已发布复盘。标题和摘要公开，正文权限仍按会员/管理员规则控制。"
       />
       <AdminPostList posts={posts} />
     </div>

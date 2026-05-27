@@ -5,14 +5,14 @@ import { cn } from '@/lib/utils/cn';
 import { Card } from '@/components/ui/card';
 
 export function AdminPanel({ children, className }: { children: ReactNode; className?: string }) {
-  return <Card className={cn('rounded-[24px] p-5 shadow-[0_14px_38px_rgba(37,48,68,0.07)]', className)}>{children}</Card>;
+  return <Card className={cn('rounded-[28px] border-[var(--neko-line)] bg-white/76 p-5 shadow-[0_14px_38px_rgba(93,65,57,0.08)]', className)}>{children}</Card>;
 }
 
 export function PanelHeading({ icon, title, description, action }: { icon?: ReactNode; title: string; description?: string; action?: ReactNode }) {
   return (
     <div className="mb-5 flex items-start justify-between gap-4">
       <div>
-        <div className="flex items-center gap-2 text-lg font-semibold text-[var(--foreground)]">
+        <div className="flex items-center gap-2 text-lg font-black text-[var(--neko-ink)]">
           {icon ? <span className="text-[var(--accent)]">{icon}</span> : null}
           {title}
         </div>

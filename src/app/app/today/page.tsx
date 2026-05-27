@@ -11,14 +11,14 @@ export default async function TodayPage() {
 
   return (
     <div className="space-y-6">
-      <section className="legacy-gradient relative overflow-hidden rounded-[28px] px-6 py-7 text-white shadow-[0_24px_70px_rgba(102,126,234,0.24)] md:px-8">
+      <section className="legacy-gradient relative overflow-hidden rounded-[32px] px-5 py-7 text-white shadow-[0_24px_70px_rgba(201,101,113,0.2)]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.24),transparent_28%)]" />
-        <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div className="relative grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
           <div>
             <div className="mb-3 inline-flex rounded-full border border-white/18 bg-white/12 px-4 py-2 text-xs uppercase tracking-[0.18em] text-white/78">
               Day {data.summary.currentDay} · {data.summary.todayString}
             </div>
-            <h1 className="serif-heading text-4xl leading-tight">今日录入操作台</h1>
+            <h1 className="text-4xl font-black leading-tight">今日行动台</h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-white/76">
               每天只处理三件事：登记收入、勾选任务、写复盘文章。其它统计自动同步到首页、项目看板、收入情况和完成进度。
             </p>

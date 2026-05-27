@@ -133,7 +133,7 @@ export function Hero({ data }: { data: DashboardData }) {
             <DockItem href="/app/projects" icon={<Compass size={31} />} label="项目" />
             <DockItem href="/app/progress" icon={<Target size={31} />} label="进度" />
             <DockItem href="/app/today" icon={<Zap size={31} />} label="录入" />
-            <DockItem href="/register" icon={<UserRound size={31} />} label="我的" />
+            <DockItem href="/me" icon={<UserRound size={31} />} label="我的" />
           </nav>
         </div>
       </div>
