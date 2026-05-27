@@ -1,115 +1,228 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import type { ReactNode } from 'react';
-import { Activity, CalendarDays, Coins, Flag, FolderKanban, Target } from 'lucide-react';
+import { Clock3, Compass, MessageCircle, Mic, PawPrint, Send, Settings, Sparkles, Star, UserRound, Zap } from 'lucide-react';
 
 import type { AwaitedReturn } from '@/types/common';
-import { formatCompactCurrency, formatCurrency, formatPercent } from '@/lib/utils/format';
-
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { clampPercent } from '@/lib/utils/format';
 
 type DashboardData = AwaitedReturn<typeof import('@/lib/data/queries').getDashboardData>;
 
 export function Hero({ data }: { data: DashboardData }) {
-  const { settings, summary } = data;
-  const dailyTarget = summary.gapToGoal / Math.max(settings.total_days - summary.currentDay + 1, 1);
+  const { summary, posts, projectTotals } = data;
+  const memoryCount = posts.length;
+  const companionLevel = Math.max(1, Math.round(summary.currentDay / 7));
+  const intimacy = clampPercent(Math.max(summary.incomeProgress * 2.4, summary.timeProgress * 0.76, memoryCount * 12));
+  const stamina = clampPercent(Math.max(18, 100 - summary.timeProgress * 0.42));
+  const focus = clampPercent(Math.max(20, summary.incomeProgress + summary.timeProgress * 0.6));
+  const liveTime = new Intl.DateTimeFormat('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(new Date());
 
   return (
-    <section className="page-shell grid gap-6 py-8 lg:grid-cols-[1.24fr_0.76fr] lg:py-12">
-      <div className="legacy-gradient relative overflow-hidden rounded-[28px] px-7 py-8 text-white shadow-[0_30px_80px_rgba(102,126,234,0.26)] md:px-10 md:py-11">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_28%),radial-gradient(circle_at_left,rgba(255,184,77,0.22),transparent_32%)]" />
-        <div className="relative flex flex-col gap-8">
-          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/18 bg-white/12 px-4 py-2 text-xs uppercase tracking-[0.18em] text-white/80">
-            <Flag size={14} /> 公开实盘挑战
-          </div>
-
-          <div className="max-w-3xl space-y-4">
-            <h1 className="serif-heading text-4xl leading-tight md:text-6xl">
-              1个人的赚钱赎身记：
-              <br />
-              1000天，赚到1000万。
-            </h1>
-            <p className="max-w-2xl text-base leading-8 text-white/78 md:text-lg">
-              这不是课程包装页，而是每天记录项目、任务、收入和复盘的实盘系统。游客看进度和标题，会员看文章正文，后台只服务每天少量录入。
-            </p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-4">
-            <MetricBox icon={<Target size={20} />} label="总目标" value={formatCompactCurrency(settings.total_target)} muted="1000天终局" />
-            <MetricBox icon={<CalendarDays size={20} />} label="当前天数" value={`第 ${summary.currentDay} 天`} muted={`起始 ${settings.start_date}`} />
-            <MetricBox icon={<Coins size={20} />} label="累计收入" value={formatCurrency(summary.totalRevenue)} muted={`今日 ${formatCurrency(summary.todayRevenue)}`} />
-            <MetricBox icon={<FolderKanban size={20} />} label="活跃项目" value={`${summary.activeProjects} 个`} muted="并行收入来源" />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <Link href="/articles">
-              <Button className="bg-[var(--highlight)] text-[#252038] hover:bg-[#ffc86f]">查看最新文章</Button>
-            </Link>
-            <Link href="/login">
-              <Button variant="secondary" className="border-white/20 bg-white/10 text-white hover:bg-white/16">
-                注册 / 登录会员
-              </Button>
-            </Link>
-          </div>
+    <section className="neko-screen mx-auto mt-0 min-h-screen max-w-[1360px] overflow-hidden rounded-b-[28px] border border-[var(--neko-line)] bg-[var(--neko-bg)] shadow-[0_28px_90px_rgba(83,58,48,0.14)]">
+      <div className="neko-titlebar">
+        <div className="flex items-center gap-3">
+          <span className="neko-traffic bg-[#ff5b63]" />
+          <span className="neko-traffic bg-[#f6bd2d]" />
+          <span className="neko-traffic bg-[#35c568]" />
         </div>
+        <Link href="/" className="min-w-0 justify-self-center truncate text-center text-lg font-bold text-[var(--neko-ink-soft)] md:text-2xl">
+          OpenTiaotiao Engine
+        </Link>
+        <Link href="/app/today" aria-label="进入后台设置" className="hidden h-11 w-11 items-center justify-center rounded-full border border-[var(--neko-line)] bg-white/75 text-[var(--neko-brown)] shadow-sm transition hover:-translate-y-0.5 hover:bg-white md:flex">
+          <Settings size={22} />
+        </Link>
       </div>
 
-      <Card className="soft-grid flex flex-col justify-between gap-6 overflow-hidden rounded-[28px] bg-white/90">
-        <div>
-          <div className="text-sm uppercase tracking-[0.18em] text-[var(--muted)]">Goal Snapshot</div>
-          <h2 className="serif-heading mt-3 text-3xl text-[var(--foreground)]">目标、进度、缺口，一屏看懂。</h2>
+      <div className="relative px-5 pb-8 pt-5 md:px-10 lg:px-16">
+        <div className="mx-auto flex w-fit flex-wrap items-center justify-center gap-x-8 gap-y-3 rounded-full border border-[var(--neko-line)] bg-white/72 px-7 py-4 text-sm font-bold text-[var(--neko-brown)] shadow-[0_10px_34px_rgba(99,65,54,0.08)] backdrop-blur-md md:text-xl">
+          <StatusDot tone="green" label="Live2D 已加载" />
+          <StatusDot tone="rose" label="专注" />
+          <StatusDot tone="green" label="挑战在线" />
+          <span className="flex items-center gap-2 text-[var(--neko-muted)]"><Clock3 size={20} /> {liveTime}</span>
         </div>
 
-        <div className="grid gap-4">
-          <ProgressMetric label="收入进度" value={formatPercent(summary.incomeProgress)} percent={summary.incomeProgress} />
-          <ProgressMetric label="时间进度" value={formatPercent(summary.timeProgress)} percent={summary.timeProgress} />
-          <CompactMetric icon={<Activity size={17} />} label="剩余缺口" value={formatCurrency(summary.gapToGoal)} />
-          <CompactMetric icon={<Coins size={17} />} label="剩余日均目标" value={formatCurrency(dailyTarget)} muted="按剩余天数倒推需要达到的每日收入" />
+        <div className="grid min-h-[980px] gap-6 pt-10 lg:grid-cols-[340px_minmax(360px,1fr)_312px] lg:items-start xl:min-h-[1080px]">
+          <aside className="z-10 space-y-6">
+            <Panel className="min-h-[310px]">
+              <div className="text-lg font-bold text-[var(--neko-ink)]">
+                第 {summary.currentDay} 天 <span className="ml-3 text-[var(--neko-red)]">成长晴朗</span>
+              </div>
+              <h1 className="mt-7 text-3xl font-black leading-tight tracking-normal text-[#151719] md:text-4xl">
+                晚上好
+                <br />
+                Tiaotiao
+                <br />
+                Lumia
+              </h1>
+              <p className="mt-7 max-w-[220px] text-lg leading-9 text-[var(--neko-brown)]">
+                今天要不要一起把收入、任务和复盘都喂给成长引擎？
+              </p>
+            </Panel>
+
+            <Panel>
+              <h2 className="mb-6 text-xl font-bold text-[var(--neko-ink)]">身体状态</h2>
+              <CareBar label="饱食" value={intimacy} color="green" />
+              <CareBar label="水分" value={stamina} color="red" />
+              <CareBar label="活力" value={focus} color="orange" />
+            </Panel>
+
+            <Panel>
+              <h2 className="mb-5 text-xl font-bold text-[var(--neko-ink)]">关系节奏</h2>
+              <RhythmRow label="记忆数" value={`${memoryCount}`} />
+              <RhythmRow label="项目羁绊" value={`${projectTotals.length}`} />
+              <RhythmRow label="伙伴等级" value={`Lv.${companionLevel}`} />
+            </Panel>
+          </aside>
+
+          <div className="relative order-first flex min-h-[720px] items-start justify-center lg:order-none lg:min-h-[1010px]">
+            <div className="neko-room-glow" />
+            <div className="absolute top-8 h-[660px] w-[660px] rounded-full bg-[radial-gradient(circle,rgba(255,227,196,0.48),rgba(255,246,239,0)_64%)]" />
+            <Image
+              src="/assets/companion-lumia-stage-cutout.png"
+              alt="Lumia 养成伙伴"
+              width={430}
+              height={1060}
+              unoptimized
+              priority
+              className="neko-avatar relative z-10 mt-2 h-[720px] w-auto max-w-[82vw] object-contain md:h-[860px] lg:h-[980px]"
+            />
+          </div>
+
+          <aside className="z-10 space-y-6">
+            <Panel>
+              <div className="text-lg font-bold text-[var(--neko-ink)]">
+                LIVE STAGE <span className="ml-3 text-[var(--neko-red)]">运行中</span>
+              </div>
+              <h2 className="mt-6 text-2xl font-black leading-snug text-[#111418]">
+                Lumia 在桌面
+                <br />
+                陪伴中
+              </h2>
+              <div className="mt-6 space-y-4">
+                <StagePill dot="green" label="模型" value="Live2D" />
+                <StagePill dot="rose" label="心情" value="开心" />
+                <StagePill dot="orange" label="互动" value={`${summary.activeProjects + memoryCount}`} />
+              </div>
+            </Panel>
+
+            <Panel>
+              <h2 className="mb-5 text-xl font-bold text-[var(--neko-ink)]">快捷动作</h2>
+              <QuickAction href="/articles" icon={<MessageCircle size={25} />} title="去对话" subtitle="读复盘..." tone="rose" />
+              <QuickAction href="/articles" icon={<Star size={27} />} title="查记忆" subtitle="看文章..." tone="orange" />
+              <QuickAction href="/app/today" icon={<Sparkles size={25} />} title="同步..." subtitle="今日录入..." tone="green" />
+            </Panel>
+          </aside>
         </div>
 
-        <div className="rounded-[24px] border border-[var(--border)] bg-white/72 p-4">
-          <div className="mb-2 text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Positioning</div>
-          <p className="text-sm leading-7 text-[var(--foreground)]/80">
-            第一版不追求复杂，核心是把每天发生的收入、任务完成情况和复盘文章沉淀下来，让长期挑战有连续记录。
-          </p>
+        <div className="relative z-20 mx-auto mt-6 max-w-[1088px] space-y-8">
+          <div className="neko-inputbar">
+            <span className="min-w-0 flex-1 truncate px-2 text-xl text-[var(--neko-muted)] md:text-2xl">跟 Lumia 说点什么...</span>
+            <Link href="/login" aria-label="登录语音入口" className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-[var(--neko-line)] bg-white text-[var(--neko-brown)] shadow-sm md:h-16 md:w-16">
+              <Mic size={28} />
+            </Link>
+            <Link href="/articles" aria-label="发送并查看记忆" className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[var(--neko-red)] text-white shadow-[0_14px_28px_rgba(197,99,111,0.34)] md:h-[72px] md:w-[72px]">
+              <Send size={30} />
+            </Link>
+          </div>
+
+          <nav className="neko-dock">
+            <DockItem href="/" icon={<PawPrint size={31} />} label="陪伴" active />
+            <DockItem href="/articles" icon={<MessageCircle size={31} />} label="对话" />
+            <DockItem href="/articles" icon={<Star size={31} />} label="记忆" />
+            <DockItem href="/app/projects" icon={<Compass size={31} />} label="世界" />
+            <DockItem href="/app/today" icon={<Zap size={31} />} label="Agent" />
+            <DockItem href="/register" icon={<UserRound size={31} />} label="我的" />
+          </nav>
         </div>
-      </Card>
+      </div>
     </section>
   );
 }
 
-function MetricBox({ icon, label, value, muted }: { icon: ReactNode; label: string; value: string; muted: string }) {
+function StatusDot({ tone, label }: { tone: 'green' | 'rose'; label: string }) {
   return (
-    <div className="rounded-[22px] border border-white/12 bg-white/10 px-4 py-5 backdrop-blur-sm">
-      <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-white/68">{icon}{label}</div>
-      <div className="mt-3 break-words text-2xl font-semibold leading-tight">{value}</div>
-      <div className="mt-2 text-sm text-white/62">{muted}</div>
+    <span className="flex items-center gap-3">
+      <span className={`h-3 w-3 rounded-full ${tone === 'green' ? 'bg-[#4abc91]' : 'bg-[var(--neko-red)]'}`} />
+      {label}
+    </span>
+  );
+}
+
+function Panel({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <div className={`neko-panel ${className}`}>{children}</div>;
+}
+
+function CareBar({ label, value, color }: { label: string; value: number; color: 'green' | 'red' | 'orange' }) {
+  const colors = {
+    green: 'bg-[#4abc91]',
+    red: 'bg-[#f05262]',
+    orange: 'bg-[#eea13d]',
+  };
+
+  return (
+    <div className="mb-5 last:mb-0">
+      <div className="mb-3 flex items-center justify-between text-lg text-[var(--neko-brown)]">
+        <span>{label}</span>
+        <strong className="text-[#111418]">{Math.round(value)}%</strong>
+      </div>
+      <div className="h-3 overflow-hidden rounded-full bg-[#ded3cd]">
+        <span className={`block h-full rounded-full ${colors[color]}`} style={{ width: `${value}%` }} />
+      </div>
     </div>
   );
 }
 
-function CompactMetric({ icon, label, value, muted }: { icon: ReactNode; label: string; value: string; muted?: string }) {
+function RhythmRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[18px] border border-[var(--border)] bg-white/74 px-4 py-4">
-      <div className="flex items-center justify-between gap-3">
-        <span className="flex items-center gap-2 text-sm text-[var(--muted)]">{icon}{label}</span>
-        <span className="text-base font-semibold text-[var(--foreground)]">{value}</span>
-      </div>
-      {muted ? <div className="mt-2 text-xs leading-5 text-[var(--muted)]">{muted}</div> : null}
+    <div className="flex items-center justify-between gap-4 py-2 text-lg">
+      <span className="text-[var(--neko-brown)]">{label}</span>
+      <strong className="text-[#111418]">{value}</strong>
     </div>
   );
 }
 
-function ProgressMetric({ label, value, percent }: { label: string; value: string; percent: number }) {
+function StagePill({ dot, label, value }: { dot: 'green' | 'rose' | 'orange'; label: string; value: string }) {
+  const dotClass = dot === 'green' ? 'bg-[#4abc91]' : dot === 'rose' ? 'bg-[var(--neko-red)]' : 'bg-[#eea13d]';
+
   return (
-    <div className="rounded-[20px] border border-[var(--border)] bg-white/74 px-4 py-4">
-      <div className="mb-3 flex items-center justify-between text-sm">
-        <span className="text-[var(--muted)]">{label}</span>
-        <span className="font-semibold text-[var(--foreground)]">{value}</span>
-      </div>
-      <div className="legacy-progress">
-        <span style={{ width: `${Math.max(0, Math.min(100, percent))}%` }} />
-      </div>
+    <div className="flex h-[58px] items-center justify-between rounded-[18px] border border-[var(--neko-line)] bg-white/62 px-5 text-lg">
+      <span className="flex items-center gap-3 text-[var(--neko-brown)]">
+        <span className={`h-3 w-3 rounded-full ${dotClass}`} />
+        {label}
+      </span>
+      <strong className="text-[#111418]">{value}</strong>
     </div>
+  );
+}
+
+function QuickAction({ href, icon, title, subtitle, tone }: { href: string; icon: ReactNode; title: string; subtitle: string; tone: 'rose' | 'orange' | 'green' }) {
+  const tones = {
+    rose: 'bg-[#f7dfe4] text-[var(--neko-red)]',
+    orange: 'bg-[#fff0de] text-[#e28e32]',
+    green: 'bg-[#e3f3ec] text-[#42b485]',
+  };
+
+  return (
+    <Link href={href} className="mb-4 flex min-h-[98px] items-center gap-5 rounded-[24px] border border-[var(--neko-line)] bg-white/66 px-4 transition hover:-translate-y-1 hover:bg-white last:mb-0">
+      <span className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full ${tones[tone]}`}>{icon}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-xl font-black text-[#111418]">{title}</span>
+        <span className="mt-1 block truncate text-base text-[var(--neko-muted)]">{subtitle}</span>
+      </span>
+      <span className="text-2xl text-[var(--neko-brown)]">›</span>
+    </Link>
+  );
+}
+
+function DockItem({ href, icon, label, active = false }: { href: string; icon: ReactNode; label: string; active?: boolean }) {
+  return (
+    <Link href={href} className={`flex min-w-[76px] flex-col items-center gap-2 text-base font-bold transition hover:-translate-y-1 ${active ? 'text-[var(--neko-red)]' : 'text-[var(--neko-brown)]'}`}>
+      {icon}
+      <span>{label}</span>
+    </Link>
   );
 }
