@@ -11,8 +11,8 @@ export default async function ProjectsPage() {
   });
 
   return (
-    <div>
-      <SectionHeader title="项目看板" description="项目代表当前并行中的收入来源。删除前会检查是否存在收入记录；已有收入的数据只能关闭，不能删除。" />
+    <div className="space-y-5">
+      <SectionHeader title="项目地图" description="每个项目是一张收入副本地图；已有收入的地图只能收起，不能直接删除。" />
       <ProjectManagement projects={projects} totals={totals} />
     </div>
   );

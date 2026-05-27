@@ -23,13 +23,13 @@ export function TaskTemplateCreateForm({ projects }: { projects: Project[] }) {
 
   return (
     <form action={createTaskTemplate} className="space-y-4">
-      <Field label="任务标题"><Input name="title" placeholder="例如文章日更" required /></Field>
+      <Field label="习惯名称"><Input name="title" placeholder="例如每天复盘 30 分钟" required /></Field>
 
       <div className="grid gap-2">
-        <div className="text-xs font-medium text-[var(--muted)]">任务类型</div>
-        <div className="grid gap-2 md:grid-cols-3">
+        <div className="text-xs font-bold text-[var(--neko-brown)]">任务类型</div>
+        <div className="grid gap-2">
           {taskTypes.map((item) => (
-            <label key={item.value} className={`cursor-pointer rounded-[18px] border px-4 py-3 transition ${sourceType === item.value ? 'border-[var(--accent)] bg-[rgba(102,126,234,0.1)]' : 'border-[var(--border)] bg-white/70 hover:bg-white'}`}>
+            <label key={item.value} className={`cursor-pointer rounded-[22px] border px-4 py-3 transition ${sourceType === item.value ? 'border-[var(--neko-red)] bg-[#f7dfe4]' : 'border-[var(--neko-line)] bg-white/70 hover:bg-white'}`}>
               <input
                 type="radio"
                 name="sourceType"
@@ -38,8 +38,8 @@ export function TaskTemplateCreateForm({ projects }: { projects: Project[] }) {
                 onChange={() => setSourceType(item.value)}
                 className="sr-only"
               />
-              <div className="text-sm font-semibold text-[var(--foreground)]">{item.label}</div>
-              <div className="mt-1 text-xs leading-5 text-[var(--muted)]">{item.description}</div>
+              <div className="text-sm font-black text-[var(--neko-ink)]">{item.label}</div>
+              <div className="mt-1 text-xs leading-5 text-[var(--neko-muted)]">{item.description}</div>
             </label>
           ))}
         </div>
@@ -59,7 +59,7 @@ export function TaskTemplateCreateForm({ projects }: { projects: Project[] }) {
       ) : null}
 
       {usesRange ? (
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3">
           <Field label="开始日期"><Input type="date" name="startDate" /></Field>
           <Field label="结束日期"><Input type="date" name="endDate" /></Field>
         </div>
@@ -67,7 +67,7 @@ export function TaskTemplateCreateForm({ projects }: { projects: Project[] }) {
         <Field label="指定日期"><Input type="date" name="scheduledDate" required /></Field>
       )}
 
-      <Button fullWidth>保存模板</Button>
+      <Button fullWidth className="h-12 rounded-[20px] font-black">保存养成习惯</Button>
     </form>
   );
 }

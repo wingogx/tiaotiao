@@ -72,7 +72,7 @@ export default async function MePage() {
             {viewer.profile ? (
               <ActionRow href="/app/today" icon={<Zap size={22} />} title="今日行动" subtitle="收入、任务、文章轻量录入" />
             ) : (
-              <ActionRow href="/login" icon={<LockKeyhole size={22} />} title="登录账号" subtitle="登录后同步会员权限和后台入口" />
+              <ActionRow href="/login" icon={<LockKeyhole size={22} />} title="登录账号" subtitle="登录后同步会员权限和行动入口" />
             )}
           </section>
 

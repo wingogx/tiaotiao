@@ -313,7 +313,7 @@ main {
 }
 
 .markdown {
-  color: #253044;
+  color: var(--neko-ink);
   line-height: 1.9;
 }
 
@@ -333,13 +333,13 @@ main {
 }
 
 .markdown blockquote {
-  border-left: 3px solid rgba(102, 126, 234, 0.32);
+  border-left: 3px solid rgba(201, 101, 113, 0.34);
   padding-left: 1rem;
-  color: #56637a;
+  color: var(--neko-brown);
 }
 
 .markdown code {
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(201, 101, 113, 0.11);
   padding: 0.125rem 0.375rem;
   border-radius: 0.375rem;
 }
@@ -347,7 +347,7 @@ main {
 .markdown pre {
   overflow-x: auto;
   padding: 1rem;
-  background: #20263a;
+  background: #382d29;
   color: #f8f6ef;
   border-radius: 1rem;
 }

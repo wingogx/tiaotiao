@@ -16,25 +16,25 @@ export function PostList({ posts, basePath = '/articles' }: { posts: DailyPost[]
     <div className="grid gap-5">
       {posts.map((post) => (
         <Link key={post.id} href={`${basePath}/${post.slug}`}>
-          <Card className="grid gap-5 rounded-[24px] p-4 transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(37,48,68,0.1)] md:grid-cols-[220px_1fr] md:p-5">
-            <div className="relative h-52 overflow-hidden rounded-[20px] bg-[linear-gradient(135deg,var(--accent),var(--secondary))]">
+          <Card className="grid gap-5 rounded-[30px] border-[var(--neko-line)] bg-white/78 p-4 shadow-[0_14px_38px_rgba(93,65,57,0.08)] transition hover:-translate-y-0.5 hover:bg-white sm:grid-cols-[180px_1fr] sm:p-5">
+            <div className="relative h-52 overflow-hidden rounded-[24px] bg-[linear-gradient(135deg,var(--neko-red),#eea13d)] sm:h-full">
               {post.cover_url ? (
                 <Image src={post.cover_url} alt={post.title} fill className="object-cover" />
               ) : (
-                <div className="flex h-full items-end bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_45%)] p-5 text-white/78">
-                  {formatDate(post.post_date)}
+                <div className="flex h-full items-end bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.24),transparent_45%)] p-5 text-sm font-bold text-white/82">
+                  复盘记忆 · {formatDate(post.post_date)}
                 </div>
               )}
             </div>
 
             <div className="flex flex-col justify-between gap-4 py-1">
               <div>
-                <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">{formatDate(post.post_date)}</div>
-                <h2 className="serif-heading mt-3 text-2xl leading-tight text-[var(--foreground)] md:text-3xl">{post.title}</h2>
-                <p className="mt-4 text-sm leading-8 text-[var(--muted)]">{post.excerpt}</p>
+                <div className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--neko-muted)]">{formatDate(post.post_date)}</div>
+                <h2 className="mt-3 text-2xl font-black leading-tight text-[var(--neko-ink)]">{post.title}</h2>
+                <p className="mt-4 text-sm leading-8 text-[var(--neko-muted)]">{post.excerpt}</p>
               </div>
 
-              <div className="text-sm font-medium text-[var(--accent)]">查看文章正文</div>
+              <div className="text-sm font-black text-[var(--neko-red)]">打开记忆卡</div>
             </div>
           </Card>
         </Link>

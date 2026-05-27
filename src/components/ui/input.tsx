@@ -7,7 +7,7 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
     <input
       {...props}
       className={cn(
-        'h-11 w-full rounded-2xl border border-[var(--border)] bg-white/80 px-4 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:bg-white',
+        'h-12 w-full rounded-[20px] border border-[var(--neko-line)] bg-white/78 px-4 text-sm text-[var(--neko-ink)] shadow-sm outline-none transition placeholder:text-[var(--neko-muted)] focus:border-[var(--neko-red)] focus:bg-white',
         props.className,
       )}
     />
@@ -19,7 +19,7 @@ export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
     <textarea
       {...props}
       className={cn(
-        'min-h-32 w-full rounded-3xl border border-[var(--border)] bg-white/80 px-4 py-3 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:bg-white',
+        'min-h-32 w-full rounded-[24px] border border-[var(--neko-line)] bg-white/78 px-4 py-3 text-sm text-[var(--neko-ink)] shadow-sm outline-none transition placeholder:text-[var(--neko-muted)] focus:border-[var(--neko-red)] focus:bg-white',
         props.className,
       )}
     />

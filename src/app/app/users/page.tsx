@@ -6,8 +6,8 @@ export default async function UsersPage() {
   const profiles = await getProfiles();
 
   return (
-    <div>
-      <SectionHeader title="用户权限" description="第一版只有一个 admin。其他邮箱登录后默认没有正文权限，由你在这里手动授权。" />
+    <div className="space-y-5">
+      <SectionHeader title="伙伴权限" description="管理谁可以查看完整复盘正文，保持内容区和账号权限一致。" />
       <UserRoleManager profiles={profiles} />
     </div>
   );

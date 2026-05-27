@@ -18,16 +18,16 @@ export function RevenueCurve({ data }: { data: RevenueCurvePoint[] }) {
   }
 
   return (
-    <div className="h-[320px] w-full">
+    <div className="h-[300px] w-full overflow-hidden rounded-[24px] border border-[var(--neko-line)] bg-white/62 p-2">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 12, right: 18, left: 0, bottom: 0 }}>
+        <AreaChart data={data} margin={{ top: 12, right: 8, left: -18, bottom: 0 }}>
           <defs>
             <linearGradient id="revenueTotal" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.32} />
               <stop offset="95%" stopColor="var(--accent)" stopOpacity={0.02} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="rgba(37,48,68,0.08)" vertical={false} />
+          <CartesianGrid stroke="rgba(107,78,68,0.1)" vertical={false} />
           <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} minTickGap={24} />
           <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} tickFormatter={(value) => `¥${Number(value).toLocaleString('zh-CN')}`} width={86} />
           <Tooltip

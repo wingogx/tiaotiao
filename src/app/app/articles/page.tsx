@@ -6,10 +6,10 @@ export default async function AppArticlesPage() {
   const posts = await getPosts();
 
   return (
-    <div>
+    <div className="space-y-5">
       <SectionHeader
-        title="每日文章"
-        description="查看已发布复盘。标题和摘要公开，正文权限仍按会员/管理员规则控制。"
+        title="复盘记忆"
+        description="查看已发布的复盘记忆卡。公开区展示标题和摘要，完整正文按权限开放。"
       />
       <AdminPostList posts={posts} />
     </div>

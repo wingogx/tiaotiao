@@ -30,7 +30,7 @@ export function Hero({ data }: { data: DashboardData }) {
         <Link href="/" className="min-w-0 justify-self-center truncate text-center text-lg font-bold text-[var(--neko-ink-soft)] md:text-2xl">
           1000天实盘挑战舱
         </Link>
-        <Link href="/app/today" aria-label="进入后台设置" className="hidden h-11 w-11 items-center justify-center rounded-full border border-[var(--neko-line)] bg-white/75 text-[var(--neko-brown)] shadow-sm transition hover:-translate-y-0.5 hover:bg-white md:flex">
+        <Link href="/app/today" aria-label="进入今日行动" className="hidden h-11 w-11 items-center justify-center rounded-full border border-[var(--neko-line)] bg-white/75 text-[var(--neko-brown)] shadow-sm transition hover:-translate-y-0.5 hover:bg-white md:flex">
           <Settings size={22} />
         </Link>
       </div>

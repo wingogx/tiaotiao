@@ -9,13 +9,13 @@ import { Card } from '@/components/ui/card';
 
 export function PostDetail({ post, canViewContent, shell = true }: { post: DailyPost; canViewContent: boolean; shell?: boolean }) {
   const content = (
-    <Card className="overflow-hidden rounded-[30px] p-0">
-      <div className="grid gap-8 p-6 md:p-8 lg:grid-cols-[0.95fr_1.05fr]">
+    <Card className="overflow-hidden rounded-[32px] border-[var(--neko-line)] bg-white/78 p-0 shadow-[0_14px_38px_rgba(93,65,57,0.08)]">
+      <div className="grid gap-6 p-5 md:grid-cols-[0.95fr_1.05fr] md:p-7">
         <div className="space-y-6">
-          <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">{formatDate(post.post_date)}</div>
-          <h1 className="serif-heading text-4xl leading-tight text-[var(--foreground)] md:text-5xl">{post.title}</h1>
-          <p className="text-sm leading-8 text-[var(--muted)]">{post.excerpt}</p>
-          <div className="relative min-h-[340px] overflow-hidden rounded-[26px] bg-[linear-gradient(135deg,var(--accent),var(--secondary))]">
+          <div className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--neko-muted)]">{formatDate(post.post_date)}</div>
+          <h1 className="text-4xl font-black leading-tight text-[var(--neko-ink)]">{post.title}</h1>
+          <p className="text-sm leading-8 text-[var(--neko-muted)]">{post.excerpt}</p>
+          <div className="relative min-h-[300px] overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,var(--neko-red),#eea13d)]">
             {post.cover_url ? (
               <Image src={post.cover_url} alt={post.title} fill className="object-cover" />
             ) : (
@@ -24,15 +24,15 @@ export function PostDetail({ post, canViewContent, shell = true }: { post: Daily
           </div>
         </div>
 
-        <div className="rounded-[26px] border border-[var(--border)] bg-white/72 p-6 md:p-8">
+        <div className="rounded-[28px] border border-[var(--neko-line)] bg-white/72 p-5 md:p-7">
           {canViewContent ? (
             <div className="markdown">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content_md}</ReactMarkdown>
             </div>
           ) : (
-            <div className="flex h-full flex-col justify-center rounded-[24px] border border-dashed border-[var(--border)] bg-white/60 px-6 py-10 text-center">
-              <div className="serif-heading text-3xl text-[var(--foreground)]">正文内容仅对会员开放</div>
-              <p className="mt-4 text-sm leading-8 text-[var(--muted)]">
+            <div className="flex h-full flex-col justify-center rounded-[26px] border border-dashed border-[var(--neko-line)] bg-white/60 px-6 py-10 text-center">
+              <div className="text-3xl font-black text-[var(--neko-ink)]">完整记忆仅对会员开放</div>
+              <p className="mt-4 text-sm leading-8 text-[var(--neko-muted)]">
                 现在可以先浏览标题、日期、封面和摘要。登录并获得会员权限后，即可查看完整复盘内容。
               </p>
             </div>
@@ -47,7 +47,7 @@ export function PostDetail({ post, canViewContent, shell = true }: { post: Daily
   }
 
   return (
-    <div className="page-shell py-10">
+    <div className="mx-auto w-full max-w-[900px] px-4 py-5">
       {content}
     </div>
   );
