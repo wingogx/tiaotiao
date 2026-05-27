@@ -15,11 +15,11 @@ export function RevenueOverview({ data }: { data: DashboardData }) {
         <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="neko-chip text-xs font-bold uppercase tracking-[0.16em]">
-              <HeartPulse size={17} /> Growth Rhythm
+              <HeartPulse size={17} /> Revenue Rhythm
             </div>
-            <h2 className="mt-4 text-3xl font-black text-[var(--neko-ink)]">成长日志：过去 14 天收入心跳</h2>
+            <h2 className="mt-4 text-3xl font-black text-[var(--neko-ink)]">收入曲线：过去 14 天实盘变化</h2>
           </div>
-          <div className="text-sm text-[var(--neko-muted)]">每一笔收入都会变成 Lumia 的成长值</div>
+          <div className="text-sm text-[var(--neko-muted)]">每一笔收入都会进入 1000 万目标进度</div>
         </div>
 
         <div className="grid h-[300px] grid-cols-14 items-end gap-2 rounded-[26px] border border-[var(--neko-line)] bg-white/52 p-4">
@@ -44,14 +44,14 @@ export function RevenueOverview({ data }: { data: DashboardData }) {
 
       <div className="neko-section p-6 md:p-8">
         <div className="neko-chip text-xs font-bold uppercase tracking-[0.16em]">
-          <Wifi size={17} /> Companion Assets
+          <Wifi size={17} /> Project Sources
         </div>
-        <h2 className="mt-4 text-3xl font-black text-[var(--neko-ink)]">收入来源变成世界资产</h2>
+        <h2 className="mt-4 text-3xl font-black text-[var(--neko-ink)]">当前收入来源项目</h2>
 
         <div className="mt-7 space-y-4">
           {data.projectTotals.length === 0 ? (
             <div className="rounded-[24px] border border-dashed border-[var(--neko-line)] bg-white/48 px-5 py-8 text-sm leading-7 text-[var(--neko-muted)]">
-              还没有项目数据。创建一个收入项目后，它会以“世界资产”的形式出现在这里。
+              还没有项目数据。创建收入来源项目后，它会出现在这里，并参与累计收入统计。
             </div>
           ) : (
             data.projectTotals.slice(0, 4).map((project) => {
@@ -84,7 +84,7 @@ export function RevenueOverview({ data }: { data: DashboardData }) {
         </div>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <SmallStatus icon={<ShieldCheck size={21} />} label="本地优先" value="已启用" />
+          <SmallStatus icon={<ShieldCheck size={21} />} label="收入归属项目" value="必填" />
           <SmallStatus icon={<HeartPulse size={21} />} label="真实记录" value="持续同步" />
         </div>
       </div>
