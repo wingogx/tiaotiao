@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { ReactNode } from 'react';
-import { BookOpen, Clock3, Compass, FolderKanban, Mic, PawPrint, Send, Settings, Sparkles, Target, UserRound, Zap } from 'lucide-react';
+import { BookOpen, Clock3, Compass, FolderKanban, PawPrint, Settings, Sparkles, Target, UserRound, Zap } from 'lucide-react';
 
 import type { AwaitedReturn } from '@/types/common';
 import { clampPercent, formatCompactCurrency, formatCurrency, formatPercent } from '@/lib/utils/format';
@@ -109,30 +109,20 @@ export function Hero({ data }: { data: DashboardData }) {
 
             <Panel>
               <h2 className="mb-5 text-xl font-bold text-[var(--neko-ink)]">快捷动作</h2>
-              <QuickAction href="/app/today" icon={<Sparkles size={25} />} title="今日录入" subtitle="收入 / 任务 / 复盘" tone="rose" />
+              <QuickAction href="/app/today?tab=income" icon={<Sparkles size={25} />} title="今日录入" subtitle="收入 / 任务 / 复盘" tone="rose" />
               <QuickAction href="/articles" icon={<BookOpen size={27} />} title="每日复盘" subtitle={`${memoryCount} 篇记录`} tone="orange" />
               <QuickAction href="/app/projects" icon={<FolderKanban size={25} />} title="项目看板" subtitle={`${summary.activeProjects} 个进行中`} tone="green" />
             </Panel>
           </aside>
         </div>
 
-        <div className="relative z-20 mx-auto mt-6 max-w-[1088px] space-y-8">
-          <div className="neko-inputbar">
-            <span className="min-w-0 flex-1 truncate px-2 text-xl text-[var(--neko-muted)] md:text-2xl">记录今天的收入 / 任务 / 复盘...</span>
-            <Link href="/login" aria-label="登录语音入口" className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-[var(--neko-line)] bg-white text-[var(--neko-brown)] shadow-sm md:h-16 md:w-16">
-              <Mic size={28} />
-            </Link>
-            <Link href="/app/today" aria-label="进入今日录入" className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[var(--neko-red)] text-white shadow-[0_14px_28px_rgba(197,99,111,0.34)] md:h-[72px] md:w-[72px]">
-              <Send size={30} />
-            </Link>
-          </div>
-
+        <div className="relative z-20 mx-auto mt-6 max-w-[1088px]">
           <nav className="neko-dock">
             <DockItem href="/" icon={<PawPrint size={31} />} label="首页" active />
-            <DockItem href="/articles" icon={<BookOpen size={31} />} label="复盘" />
-            <DockItem href="/app/projects" icon={<Compass size={31} />} label="项目" />
             <DockItem href="/app/progress" icon={<Target size={31} />} label="进度" />
-            <DockItem href="/app/today" icon={<Zap size={31} />} label="录入" />
+            <DockItem href="/app/projects" icon={<Compass size={31} />} label="项目" />
+            <DockItem href="/articles" icon={<BookOpen size={31} />} label="复盘" />
+            <DockItem href="/app/today?tab=income" icon={<Zap size={31} />} label="录入" />
             <DockItem href="/me" icon={<UserRound size={31} />} label="我的" />
           </nav>
         </div>

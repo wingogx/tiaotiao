@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { CalendarCheck, CheckCircle2, Coins, FileText } from 'lucide-react';
 
@@ -6,7 +7,18 @@ import { TodayIncomeForm, TodayPostForm, TodayTaskList } from '@/components/app/
 import { getTodayConsoleData } from '@/lib/data/queries';
 import { formatCurrency, formatPercent } from '@/lib/utils/format';
 
-export default async function TodayPage() {
+type TodayTab = 'income' | 'review' | 'tasks';
+
+const todayTabs = [
+  { id: 'income' as TodayTab, label: '收入登记', hint: '经验值', icon: Coins },
+  { id: 'review' as TodayTab, label: '复盘文档', hint: '记忆卡', icon: FileText },
+  { id: 'tasks' as TodayTab, label: '任务打卡', hint: '执行力', icon: CheckCircle2 },
+];
+
+export default async function TodayPage({ searchParams }: { searchParams: Promise<{ tab?: string | string[] }> }) {
+  const params = await searchParams;
+  const requestedTab = typeof params.tab === 'string' ? params.tab : 'income';
+  const activeTab: TodayTab = todayTabs.some((tab) => tab.id === requestedTab) ? (requestedTab as TodayTab) : 'income';
   const data = await getTodayConsoleData();
 
   return (
@@ -37,12 +49,31 @@ export default async function TodayPage() {
         <ConsoleStat icon={<FileText size={20} />} label="最新文章" value={data.posts[0]?.title ?? '未发布'} muted="写完后前台展示标题" />
       </div>
 
-      <div className="grid gap-5 md:grid-cols-[0.92fr_1.08fr]">
-        <div className="space-y-5">
-          <TodayIncomeForm projects={data.projects} />
-          <TodayPostForm />
-        </div>
-        <TodayTaskList tasks={data.tasks} />
+      <nav className="grid grid-cols-3 gap-2 rounded-[28px] border border-[var(--neko-line)] bg-white/78 p-2 shadow-[0_14px_38px_rgba(93,65,57,0.08)] backdrop-blur-xl">
+        {todayTabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = tab.id === activeTab;
+
+          return (
+            <Link
+              key={tab.id}
+              href={`/app/today?tab=${tab.id}`}
+              className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-[22px] px-2 py-3 text-center transition ${
+                isActive ? 'bg-[#f7dfe4] text-[var(--neko-red)]' : 'text-[var(--neko-brown)] hover:bg-white/74'
+              }`}
+            >
+              <Icon size={22} />
+              <span className="truncate text-sm font-black">{tab.label}</span>
+              <span className="hidden text-[11px] font-bold opacity-70 sm:block">{tab.hint}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="mx-auto w-full max-w-[620px]">
+        {activeTab === 'income' ? <TodayIncomeForm projects={data.projects} /> : null}
+        {activeTab === 'review' ? <TodayPostForm /> : null}
+        {activeTab === 'tasks' ? <TodayTaskList tasks={data.tasks} /> : null}
       </div>
     </div>
   );
