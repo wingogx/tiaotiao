@@ -109,7 +109,7 @@ export function Hero({ data }: { data: DashboardData }) {
 
             <Panel>
               <h2 className="mb-5 text-xl font-bold text-[var(--neko-ink)]">快捷动作</h2>
-              <QuickAction href="/app/today?tab=income" icon={<Sparkles size={25} />} title="今日录入" subtitle="收入 / 任务 / 复盘" tone="rose" />
+              <QuickAction href="/app/today?tab=tasks" icon={<Sparkles size={25} />} title="今日录入" subtitle="任务 / 收入 / 复盘" tone="rose" />
               <QuickAction href="/articles" icon={<BookOpen size={27} />} title="每日复盘" subtitle={`${memoryCount} 篇记录`} tone="orange" />
               <QuickAction href="/app/projects" icon={<FolderKanban size={25} />} title="项目看板" subtitle={`${summary.activeProjects} 个进行中`} tone="green" />
             </Panel>
@@ -122,7 +122,7 @@ export function Hero({ data }: { data: DashboardData }) {
             <DockItem href="/app/progress" icon={<Target size={31} />} label="进度" />
             <DockItem href="/app/projects" icon={<Compass size={31} />} label="项目" />
             <DockItem href="/articles" icon={<BookOpen size={31} />} label="复盘" />
-            <DockItem href="/app/today?tab=income" icon={<Zap size={31} />} label="录入" />
+            <DockItem href="/app/today?tab=tasks" icon={<Zap size={31} />} label="录入" />
             <DockItem href="/me" icon={<UserRound size={31} />} label="我的" />
           </nav>
         </div>

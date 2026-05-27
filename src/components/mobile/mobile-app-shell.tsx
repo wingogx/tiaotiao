@@ -42,7 +42,7 @@ const tabs = [
     match: (pathname: string) => pathname.startsWith('/articles') || pathname.startsWith('/app/articles'),
   },
   {
-    href: '/app/today?tab=income',
+    href: '/app/today?tab=tasks',
     label: '录入',
     eyebrow: '今日行动',
     icon: Zap,

@@ -10,15 +10,15 @@ import { formatCurrency, formatPercent } from '@/lib/utils/format';
 type TodayTab = 'income' | 'review' | 'tasks';
 
 const todayTabs = [
+  { id: 'tasks' as TodayTab, label: '任务打卡', hint: '执行力', icon: CheckCircle2 },
   { id: 'income' as TodayTab, label: '收入登记', hint: '经验值', icon: Coins },
   { id: 'review' as TodayTab, label: '复盘文档', hint: '记忆卡', icon: FileText },
-  { id: 'tasks' as TodayTab, label: '任务打卡', hint: '执行力', icon: CheckCircle2 },
 ];
 
 export default async function TodayPage({ searchParams }: { searchParams: Promise<{ tab?: string | string[] }> }) {
   const params = await searchParams;
-  const requestedTab = typeof params.tab === 'string' ? params.tab : 'income';
-  const activeTab: TodayTab = todayTabs.some((tab) => tab.id === requestedTab) ? (requestedTab as TodayTab) : 'income';
+  const requestedTab = typeof params.tab === 'string' ? params.tab : 'tasks';
+  const activeTab: TodayTab = todayTabs.some((tab) => tab.id === requestedTab) ? (requestedTab as TodayTab) : 'tasks';
   const data = await getTodayConsoleData();
 
   return (
