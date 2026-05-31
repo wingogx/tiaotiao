@@ -1,7 +1,9 @@
 import { subDays } from 'date-fns';
 
+import { getCurrentSessionUser } from '@/lib/auth/session';
+import { emptyUserHomeVitals, parseSiteHomeState, parseUserHomeVitals } from '@/lib/home/state';
 import { createServiceRoleClient } from '@/lib/supabase/service';
-import { clampPercent, excerptFromMarkdown, formatDate, getCurrentDayIndex, slugify } from '@/lib/utils/format';
+import { clampPercent, excerptFromMarkdown, formatDate, getCurrentDayIndex, getShanghaiDateString, slugify } from '@/lib/utils/format';
 
 export type SiteSettings = {
   id: number;
@@ -67,7 +69,7 @@ export type DailyPost = {
 };
 
 function getTodayString() {
-  return formatDate(new Date());
+  return getShanghaiDateString();
 }
 
 export async function ensureDailyTasks(taskDate = getTodayString()) {
@@ -202,15 +204,17 @@ export async function getProfiles() {
 }
 
 export async function getDashboardData() {
-  const [settings, projects, incomeRecords, posts] = await Promise.all([
+  const [settings, projects, incomeRecords, posts, currentUser] = await Promise.all([
     getSiteSettings(),
     getProjects(),
     getIncomeRecords(),
     getPosts(5),
+    getCurrentSessionUser(),
   ]);
 
   const today = new Date();
   const todayString = getTodayString();
+  const homeState = parseSiteHomeState(settings.site_subtitle);
   const currentDay = getCurrentDayIndex(settings.start_date);
   const totalRevenue = incomeRecords.reduce((sum, item) => sum + Number(item.amount), 0);
   const todayRevenue = incomeRecords
@@ -247,9 +251,38 @@ export async function getDashboardData() {
     };
   });
 
+  let viewer: { id: string; email: string; displayName: string | null } | null = null;
+  let viewerVitals = null;
+
+  if (currentUser?.id) {
+    const service = createServiceRoleClient();
+    const { data, error } = await service.auth.admin.getUserById(currentUser.id);
+    const authUser = data.user;
+
+    viewer = {
+      id: currentUser.id,
+      email: currentUser.email ?? '',
+      displayName:
+        authUser?.user_metadata?.display_name && typeof authUser.user_metadata.display_name === 'string'
+          ? authUser.user_metadata.display_name
+          : currentUser.user_metadata?.display_name ?? null,
+    };
+
+    viewerVitals = error
+      ? emptyUserHomeVitals(todayString)
+      : parseUserHomeVitals(authUser?.user_metadata?.home_vitals, todayString);
+  }
+
   return {
     settings,
     posts,
+    homeStatus: {
+      mood: homeState.homeMood,
+      tagline: homeState.tagline,
+      todayString,
+    },
+    viewer,
+    viewerVitals,
     summary: {
       currentDay,
       totalRevenue,
@@ -274,6 +307,7 @@ export async function getTodayConsoleData() {
   ]);
 
   const todayString = getTodayString();
+  const homeState = parseSiteHomeState(settings.site_subtitle);
   const todayIncomeRecords = incomeRecords.filter((item) => item.record_date === todayString);
   const todayRevenue = todayIncomeRecords.reduce((sum, item) => sum + Number(item.amount), 0);
   const totalRevenue = incomeRecords.reduce((sum, item) => sum + Number(item.amount), 0);
@@ -282,6 +316,11 @@ export async function getTodayConsoleData() {
 
   return {
     settings,
+    homeStatus: {
+      mood: homeState.homeMood,
+      tagline: homeState.tagline,
+      todayString,
+    },
     projects,
     tasks,
     posts,
@@ -354,7 +393,7 @@ export function buildPostPayload({
   excerpt?: string;
 }) {
   const slugBase = slugify(title);
-  const slug = `${formatDate(new Date())}-${slugBase}`;
+  const slug = `${getShanghaiDateString()}-${slugBase}`;
 
   return {
     title,
@@ -362,6 +401,6 @@ export function buildPostPayload({
     cover_url: coverUrl?.trim() || null,
     excerpt: excerpt?.trim() || excerptFromMarkdown(content),
     content_md: content,
-    post_date: formatDate(new Date()),
+    post_date: getShanghaiDateString(),
   };
 }

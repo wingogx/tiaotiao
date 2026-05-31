@@ -1,6 +1,7 @@
-import { CheckCircle2, Circle, Coins, FileText, FolderKanban, Plus, Trash2, UserPlus } from 'lucide-react';
+import { Brain, CheckCircle2, Circle, Coins, FileText, FolderKanban, Plus, Trash2, UserPlus } from 'lucide-react';
 
 import type { DailyTask, Project, TaskTemplate } from '@/lib/data/queries';
+import { homeMoodOptions } from '@/lib/home/state';
 
 import {
   adminCreateUser,
@@ -14,6 +15,7 @@ import {
   deleteTaskTemplate,
   toggleDailyTask,
   toggleTaskTemplateActive,
+  updateHomeMood,
   updateProfileRole,
   updateProject,
   updateTaskTemplate,
@@ -24,6 +26,33 @@ import { AdminPanel, EmptyState, Field, PanelHeading, StatusBadge, selectClassNa
 import { TaskTemplateCreateForm } from '@/components/app/task-template-create-form';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
+
+export function TodayMoodForm({ currentMood }: { currentMood: string }) {
+  return (
+    <AdminPanel>
+      <PanelHeading icon={<Brain size={19} />} title="今日精神状态" description="这里更新后，首页会同步展示今天的心情与陪伴文案。" />
+      <div className="flex flex-wrap gap-2">
+        {homeMoodOptions.map((mood) => (
+          <form key={mood} action={updateHomeMood}>
+            <button
+              type="submit"
+              name="mood"
+              value={mood}
+              data-testid={`today-mood-${mood}`}
+              className={`rounded-full border px-4 py-2 text-sm font-black transition ${
+                currentMood === mood
+                  ? 'border-[var(--neko-red)] bg-[#f7dfe4] text-[var(--neko-red)]'
+                  : 'border-[var(--neko-line)] bg-white/76 text-[var(--neko-brown)] hover:bg-white'
+              }`}
+            >
+              {mood}
+            </button>
+          </form>
+        ))}
+      </div>
+    </AdminPanel>
+  );
+}
 
 export function TodayIncomeForm({ projects }: { projects: Project[] }) {
   return (

@@ -4,10 +4,12 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
-import { requireAdmin } from '@/lib/auth/session';
+import { requireAdmin, syncProfile } from '@/lib/auth/session';
+import { homeMoodOptions, homeVitalMetricKeys, incrementUserHomeVitals, parseSiteHomeState, serializeSiteHomeState } from '@/lib/home/state';
 import { buildPostPayload } from '@/lib/data/queries';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import { getShanghaiDateString } from '@/lib/utils/format';
 
 const projectSchema = z.object({
   name: z.string().min(1, '项目名称不能为空'),
@@ -78,6 +80,14 @@ const adminCreateUserSchema = z.object({
   canViewArticles: z.enum(['true', 'false']),
 });
 
+const homeMoodSchema = z.object({
+  mood: z.enum(homeMoodOptions),
+});
+
+const homeVitalSchema = z.object({
+  metric: z.enum(homeVitalMetricKeys),
+});
+
 export async function signInWithMagicLink(formData: FormData) {
   const email = String(formData.get('email') ?? '').trim();
   const next = String(formData.get('next') ?? '/articles');
@@ -142,6 +152,73 @@ export async function signOut() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
   redirect('/');
+}
+
+export async function updateHomeMood(formData: FormData) {
+  await requireAdmin();
+  const service = createServiceRoleClient();
+  const parsed = homeMoodSchema.parse({
+    mood: formData.get('mood'),
+  });
+
+  const { data: settings, error: settingsError } = await service.from('site_settings').select('site_subtitle').eq('id', 1).single<{ site_subtitle: string }>();
+
+  if (settingsError || !settings) {
+    throw new Error(`读取首页状态失败：${settingsError?.message ?? 'missing data'}`);
+  }
+
+  const currentState = parseSiteHomeState(settings.site_subtitle);
+  const { error } = await service
+    .from('site_settings')
+    .update({
+      site_subtitle: serializeSiteHomeState({
+        tagline: currentState.tagline,
+        homeMood: parsed.mood,
+      }),
+    })
+    .eq('id', 1);
+
+  if (error) {
+    throw new Error(`更新首页状态失败：${error.message}`);
+  }
+
+  revalidatePath('/');
+  revalidatePath('/app/today');
+}
+
+export async function incrementHomeVital(formData: FormData) {
+  const profile = await syncProfile();
+
+  if (!profile) {
+    redirect('/login?next=/');
+  }
+
+  const parsed = homeVitalSchema.parse({
+    metric: formData.get('metric'),
+  });
+  const service = createServiceRoleClient();
+  const { data, error } = await service.auth.admin.getUserById(profile.id);
+  const authUser = data.user;
+
+  if (error || !authUser) {
+    throw new Error(`读取用户状态失败：${error?.message ?? 'missing user'}`);
+  }
+
+  const existingMetadata =
+    authUser.user_metadata && typeof authUser.user_metadata === 'object' && !Array.isArray(authUser.user_metadata) ? authUser.user_metadata : {};
+  const nextVitals = incrementUserHomeVitals(existingMetadata.home_vitals, getShanghaiDateString(), parsed.metric);
+  const { error: updateError } = await service.auth.admin.updateUserById(profile.id, {
+    user_metadata: {
+      ...existingMetadata,
+      home_vitals: nextVitals,
+    },
+  });
+
+  if (updateError) {
+    throw new Error(`更新首页计数失败：${updateError.message}`);
+  }
+
+  revalidatePath('/');
 }
 
 export async function createProject(formData: FormData) {
@@ -378,7 +455,7 @@ export async function createTemporaryTask(formData: FormData) {
   });
 
   const { error } = await service.from('daily_tasks').insert({
-    task_date: new Date().toISOString().slice(0, 10),
+    task_date: getShanghaiDateString(),
     title: parsed.title,
     source_type: 'temporary',
     is_temporary: true,

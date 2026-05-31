@@ -1,6 +1,8 @@
 import { differenceInCalendarDays, format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 
+const shanghaiTimeZone = 'Asia/Shanghai';
+
 export function formatCurrency(value: number) {
   return new Intl.NumberFormat('zh-CN', {
     style: 'currency',
@@ -24,8 +26,28 @@ export function formatDate(value: string | Date) {
   return format(new Date(value), 'yyyy-MM-dd', { locale: zhCN });
 }
 
+export function getShanghaiDateString(value: Date = new Date()) {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: shanghaiTimeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+
+  const parts = formatter.formatToParts(value);
+  const year = parts.find((part) => part.type === 'year')?.value;
+  const month = parts.find((part) => part.type === 'month')?.value;
+  const day = parts.find((part) => part.type === 'day')?.value;
+
+  if (!year || !month || !day) {
+    throw new Error('Failed to format Shanghai date');
+  }
+
+  return `${year}-${month}-${day}`;
+}
+
 export function getCurrentDayIndex(startDate: string) {
-  return Math.max(1, differenceInCalendarDays(new Date(), new Date(startDate)) + 1);
+  return Math.max(1, differenceInCalendarDays(parseShanghaiDate(getShanghaiDateString()), parseShanghaiDate(startDate)) + 1);
 }
 
 export function clampPercent(value: number) {
@@ -51,4 +73,8 @@ export function excerptFromMarkdown(content: string, maxLength = 140) {
 
   if (plain.length <= maxLength) return plain;
   return `${plain.slice(0, maxLength).trim()}...`;
+}
+
+function parseShanghaiDate(value: string) {
+  return new Date(`${value}T00:00:00+08:00`);
 }
