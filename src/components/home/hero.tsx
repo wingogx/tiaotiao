@@ -150,7 +150,7 @@ export function Hero({ data }: { data: DashboardData }) {
                 </div>
               </div>
               <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[var(--neko-line)] pt-5">
-                <SummaryTag label="复盘记录" value={`${posts.length} 篇`} />
+                <SummaryTag label="复盘日记" value={`${posts.length} 篇`} />
                 <SummaryTag label="进行项目" value={`${summary.activeProjects} 个`} />
               </div>
             </Panel>
@@ -175,7 +175,7 @@ export function Hero({ data }: { data: DashboardData }) {
             <DockItem href="/" icon={<PawPrint size={31} />} label="首页" active />
             <DockItem href="/app/progress" icon={<Target size={31} />} label="进度" />
             <DockItem href="/app/projects" icon={<Compass size={31} />} label="项目" />
-            <DockItem href="/articles" icon={<BookOpen size={31} />} label="复盘" />
+            <DockItem href="/articles" icon={<BookOpen size={31} />} label="日记" />
             <DockItem href="/app/today?tab=tasks" icon={<Zap size={31} />} label="录入" />
             <DockItem href="/me" icon={<UserRound size={31} />} label="我的" />
           </nav>
