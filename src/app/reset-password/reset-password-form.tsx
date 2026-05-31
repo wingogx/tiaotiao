@@ -178,27 +178,27 @@ export function ResetPasswordForm() {
 
   return (
     <AuthShell title={title} description={description} brand="TIAOTIAO">
-      <div className="mt-7 rounded-2xl border border-cyan-400/15 bg-[#0f1723]/90 px-5 py-6 text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-cyan-400/25 bg-cyan-400/10">
+      <div className="mt-7 rounded-[26px] border border-[var(--neko-line)] bg-white/68 px-5 py-6 text-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[var(--neko-line)] bg-white/84 shadow-sm">
           {status === 'checking' ? (
-            <LoaderCircle className="h-8 w-8 animate-spin text-cyan-300" />
+            <LoaderCircle className="h-8 w-8 animate-spin text-[var(--neko-red)]" />
           ) : status === 'success' ? (
-            <CheckCircle2 className="h-8 w-8 text-emerald-300" />
+            <CheckCircle2 className="h-8 w-8 text-[#42b485]" />
           ) : status === 'error' ? (
-            <AlertCircle className="h-8 w-8 text-red-300" />
+            <AlertCircle className="h-8 w-8 text-[var(--danger)]" />
           ) : (
-            <KeyRound className="h-8 w-8 text-cyan-300" />
+            <KeyRound className="h-8 w-8 text-[var(--neko-red)]" />
           )}
         </div>
-        <h2 className="mt-5 text-2xl font-bold tracking-[0.06em] text-cyan-300">{title}</h2>
-        <p className="mt-3 text-sm leading-7 text-slate-400">{description}</p>
+        <h2 className="mt-5 text-2xl font-black tracking-[0.04em] text-[var(--neko-ink)]">{title}</h2>
+        <p className="mt-3 text-sm leading-7 text-[var(--neko-muted)]">{description}</p>
       </div>
 
       {status === 'ready' ? (
         <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
           <div>
-            <label className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-200" htmlFor="new-password">
-              <KeyRound className="h-4 w-4 text-cyan-300" />
+            <label className="mb-3 flex items-center gap-2 text-sm font-bold text-[var(--neko-brown)]" htmlFor="new-password">
+              <KeyRound className="h-4 w-4 text-[var(--neko-red)]" />
               新密码
             </label>
             <Input
@@ -208,13 +208,13 @@ export function ResetPasswordForm() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="至少 8 位"
-              className="h-12 rounded-xl border-cyan-400/18 bg-[#070b12]/84 px-4 text-[15px] text-white placeholder:text-slate-500 focus:border-cyan-300/60 focus:bg-[#070b12] focus-visible:ring-cyan-400/30"
+              className="h-12 rounded-[20px]"
             />
           </div>
 
           <div>
-            <label className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-200" htmlFor="confirm-password">
-              <ShieldCheck className="h-4 w-4 text-cyan-300" />
+            <label className="mb-3 flex items-center gap-2 text-sm font-bold text-[var(--neko-brown)]" htmlFor="confirm-password">
+              <ShieldCheck className="h-4 w-4 text-[var(--neko-red)]" />
               确认新密码
             </label>
             <Input
@@ -224,18 +224,18 @@ export function ResetPasswordForm() {
               value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.target.value)}
               placeholder="再次输入新密码"
-              className="h-12 rounded-xl border-cyan-400/18 bg-[#070b12]/84 px-4 text-[15px] text-white placeholder:text-slate-500 focus:border-cyan-300/60 focus:bg-[#070b12] focus-visible:ring-cyan-400/30"
+              className="h-12 rounded-[20px]"
             />
           </div>
 
           {error ? (
-            <div className="rounded-xl border border-red-400/30 bg-red-950/36 px-4 py-3 text-sm leading-6 text-red-200">{error}</div>
+            <div className="rounded-[22px] border border-[#d9a38d] bg-[#fff1ea] px-4 py-3 text-sm leading-6 text-[#8c3e21]">{error}</div>
           ) : null}
 
           <Button
             fullWidth
             disabled={isSubmitting}
-            className="h-14 rounded-2xl border-0 bg-[linear-gradient(135deg,#20c7d9_0%,#1d5dca_100%)] text-base font-bold tracking-[0.08em] text-white shadow-[0_16px_38px_rgba(29,93,202,0.34)] transition hover:brightness-110"
+            className="h-14 rounded-[22px] text-base font-black shadow-[0_16px_30px_rgba(201,101,113,0.24)]"
           >
             {isSubmitting ? '保存中...' : '保存新密码'}
           </Button>
@@ -246,13 +246,13 @@ export function ResetPasswordForm() {
         <div className="mt-6 grid gap-3">
           <Link
             href="/forgot-password"
-            className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#20c7d9_0%,#1d5dca_100%)] text-base font-bold text-white shadow-[0_16px_38px_rgba(29,93,202,0.34)] transition hover:brightness-110"
+            className="inline-flex h-12 w-full items-center justify-center rounded-[20px] bg-[var(--accent)] text-base font-black text-white shadow-[0_16px_30px_rgba(201,101,113,0.24)] transition hover:bg-[var(--accent-strong)]"
           >
             重新发起找回
           </Link>
           <Link
             href="/login"
-            className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-cyan-400/25 bg-cyan-400/8 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-400/16"
+            className="inline-flex h-12 w-full items-center justify-center rounded-[20px] border border-[var(--border)] bg-white/70 text-sm font-black text-[var(--foreground)] transition hover:bg-white"
           >
             返回登录
           </Link>
@@ -263,21 +263,21 @@ export function ResetPasswordForm() {
         <div className="mt-6">
           <Link
             href="/login?reset=1"
-            className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#20c7d9_0%,#1d5dca_100%)] text-base font-bold text-white shadow-[0_16px_38px_rgba(29,93,202,0.34)] transition hover:brightness-110"
+            className="inline-flex h-12 w-full items-center justify-center rounded-[20px] bg-[var(--accent)] text-base font-black text-white shadow-[0_16px_30px_rgba(201,101,113,0.24)] transition hover:bg-[var(--accent-strong)]"
           >
             返回登录
           </Link>
         </div>
       ) : null}
 
-      <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-slate-600">
-        <Link className="transition hover:text-slate-300" href="/">
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[var(--neko-muted)]">
+        <Link className="transition hover:text-[var(--neko-ink)]" href="/">
           返回首页
         </Link>
-        <Link className="transition hover:text-slate-300" href="/login">
+        <Link className="transition hover:text-[var(--neko-ink)]" href="/login">
           密码登录
         </Link>
-        <Link className="transition hover:text-slate-300" href="/forgot-password">
+        <Link className="transition hover:text-[var(--neko-ink)]" href="/forgot-password">
           重新找回
         </Link>
       </div>

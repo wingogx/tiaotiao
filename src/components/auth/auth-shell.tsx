@@ -11,36 +11,32 @@ type AuthShellProps = {
 
 export function AuthShell({ title, description, children, brand = 'Tiaotiao' }: AuthShellProps) {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_50%_-10%,rgba(34,211,238,0.18),transparent_34%),linear-gradient(180deg,#05070c_0%,#0b1019_48%,#101722_100%)] px-4 py-8 text-slate-100">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-[-14rem] top-[18%] h-[30rem] w-[30rem] rounded-full bg-cyan-500/10 blur-[150px]" />
-        <div className="absolute bottom-[-12rem] right-[-10rem] h-[32rem] w-[32rem] rounded-full bg-blue-600/10 blur-[160px]" />
-        <div className="absolute left-[10%] top-[14%] h-1 w-1 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(34,211,238,0.9)]" />
-        <div className="absolute right-[22%] top-[21%] h-1.5 w-1.5 rounded-full bg-cyan-300/80 shadow-[0_0_16px_rgba(34,211,238,0.8)]" />
-        <div className="absolute bottom-[20%] left-[18%] h-1 w-1 rounded-full bg-cyan-300/70 shadow-[0_0_12px_rgba(34,211,238,0.7)]" />
+    <div className="relative min-h-screen overflow-hidden px-4 py-8 text-[var(--neko-ink)]">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(255,222,185,0.82),transparent_30%),radial-gradient(circle_at_86%_10%,rgba(211,152,143,0.24),transparent_24%),linear-gradient(180deg,#fff8f2_0%,#f7efe9_52%,#f1e5dd_100%)]" />
+        <div className="absolute left-[-10rem] top-[18%] h-[24rem] w-[24rem] rounded-full bg-[#f5d1a8]/28 blur-[90px]" />
+        <div className="absolute bottom-[-8rem] right-[-8rem] h-[20rem] w-[20rem] rounded-full bg-[#d98f98]/18 blur-[88px]" />
       </div>
 
-      <section className="relative mx-auto w-full max-w-[504px] rounded-[2rem] border border-cyan-400/20 bg-[#171b24]/92 px-8 pb-8 pt-9 shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_28px_90px_rgba(0,0,0,0.45),0_0_70px_rgba(34,211,238,0.10)] backdrop-blur-2xl sm:px-10">
-        <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/70 to-transparent" />
-
+      <section className="relative mx-auto w-full max-w-[560px] rounded-[34px] border border-[var(--neko-line)] bg-white/78 px-5 pb-6 pt-6 shadow-[0_24px_70px_rgba(93,65,57,0.12)] backdrop-blur-2xl sm:px-7 sm:pb-7 sm:pt-7">
         <Link
           aria-label="返回首页"
-          className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-400/10 text-slate-400 transition hover:bg-cyan-400/20 hover:text-white"
+          className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full border border-[var(--neko-line)] bg-white/74 text-[var(--neko-muted)] shadow-sm transition hover:bg-white hover:text-[var(--neko-ink)]"
           href="/"
         >
           <X className="h-5 w-5" />
         </Link>
 
         <div className="flex justify-center">
-          <div className="flex h-[104px] w-[104px] items-center justify-center rounded-full border-2 border-cyan-400/55 bg-[radial-gradient(circle_at_35%_24%,rgba(34,211,238,0.46),rgba(15,23,42,0.92)_58%)] shadow-[0_0_34px_rgba(34,211,238,0.30)]">
-            <BarChart3 className="h-11 w-11 text-cyan-100 drop-shadow-[0_0_12px_rgba(34,211,238,0.9)]" />
+          <div className="legacy-gradient flex h-[104px] w-[104px] items-center justify-center rounded-full border border-white/40 text-white shadow-[0_22px_50px_rgba(201,101,113,0.28)]">
+            <BarChart3 className="h-11 w-11" />
           </div>
         </div>
 
         <div className="mt-8 text-center">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.35em] text-cyan-300/75">{brand}</p>
-          <h1 className="mt-3 text-[2rem] font-bold tracking-[0.08em] text-cyan-300">{title}</h1>
-          <p className="mt-3 text-sm font-medium leading-7 text-slate-400">{description}</p>
+          <p className="text-[12px] font-bold uppercase tracking-[0.35em] text-[var(--neko-muted)]">{brand}</p>
+          <h1 className="mt-3 text-[2.15rem] font-black tracking-[0.04em] text-[var(--neko-ink)]">{title}</h1>
+          <p className="mt-3 text-sm leading-7 text-[var(--neko-muted)]">{description}</p>
         </div>
 
         {children}
