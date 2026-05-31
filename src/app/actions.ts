@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import { requireAdmin } from '@/lib/auth/session';
 import { buildPostPayload } from '@/lib/data/queries';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
 const projectSchema = z.object({
@@ -134,12 +135,12 @@ export async function registerUser(formData: FormData) {
     });
   }
 
-  redirect(`/register?success=${encodeURIComponent('账号已创建，请返回登录页登录。管理员开通后即可查看会员内容。')}`);
+  redirect(`/register?success=1&email=${encodeURIComponent(parsed.data.email)}`);
 }
 
 export async function signOut() {
-  const service = createServiceRoleClient();
-  await service.auth.signOut();
+  const supabase = await createSupabaseServerClient();
+  await supabase.auth.signOut();
   redirect('/');
 }
 
