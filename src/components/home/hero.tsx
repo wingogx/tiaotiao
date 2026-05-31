@@ -134,11 +134,9 @@ export function Hero({ data }: { data: DashboardData }) {
             <Panel className="min-h-[520px]">
               <div className="text-sm font-black uppercase tracking-[0.18em] text-[var(--neko-muted)]">当前场景</div>
               <div className="mt-4 text-[1.9rem] font-black leading-tight text-[#171414]">{getSceneHeadline(mood)}</div>
-              <p className="mt-4 text-base leading-8 text-[var(--neko-brown)]">{homeStatus.tagline}</p>
-              <div className="mt-5 space-y-3">
+              <div className="mt-6 space-y-3">
                 <InlineStageRow dot="green" label="总目标" value={formatCompactCurrency(settings.total_target)} />
                 <InlineStageRow dot="rose" label="累计收入" value={formatCompactCurrency(summary.totalRevenue)} />
-                <InlineStageRow dot="orange" label="今日状态" value={mood} />
               </div>
               <div className="mt-6 border-t border-[var(--neko-line)] pt-6">
                 <div className="mb-4 text-lg font-black text-[var(--neko-ink)]">关爱账本</div>
@@ -146,7 +144,7 @@ export function Hero({ data }: { data: DashboardData }) {
                   <SummaryRow label="今日互动" value={`${todayCareTotal} 次`} />
                   <SummaryRow label="第几天" value={`Day ${summary.currentDay}`} />
                   <SummaryRow label="今日收入" value={formatCurrency(summary.todayRevenue)} />
-                  <SummaryRow label="剩余天数" value={`${remainingDays} 天`} />
+                  <RemainingDaysRow remainingDays={remainingDays} totalDays={settings.total_days} />
                 </div>
               </div>
               <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[var(--neko-line)] pt-5">
@@ -277,6 +275,25 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
     <div className="flex items-center justify-between gap-4 rounded-[18px] border border-[var(--neko-line)] bg-white/62 px-4 py-3 text-sm">
       <span className="text-[var(--neko-brown)]">{label}</span>
       <strong className="text-[var(--neko-ink)]">{value}</strong>
+    </div>
+  );
+}
+
+function RemainingDaysRow({ remainingDays, totalDays }: { remainingDays: number; totalDays: number }) {
+  const progress = clampPercent((remainingDays / totalDays) * 100);
+
+  return (
+    <div className="rounded-[18px] border border-[var(--neko-line)] bg-white/62 px-4 py-3">
+      <div className="flex items-center justify-between gap-4 text-sm">
+        <span className="text-[var(--neko-brown)]">剩余天数</span>
+        <strong className="text-[var(--neko-ink)]">{remainingDays} 天</strong>
+      </div>
+      <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-[#e8ddd5]">
+        <span
+          className="block h-full rounded-full bg-[linear-gradient(90deg,#f2ac67,#e58b6c)]"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
     </div>
   );
 }
