@@ -2,6 +2,7 @@ import { subDays } from 'date-fns';
 
 import { getCurrentSessionUser } from '@/lib/auth/session';
 import { emptyUserHomeVitals, parseSiteHomeState, parseUserHomeVitals } from '@/lib/home/state';
+import { getHomeVisitCount } from '@/lib/home/visits';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import { clampPercent, excerptFromMarkdown, formatDate, getCurrentDayIndex, getShanghaiDateString, slugify } from '@/lib/utils/format';
 
@@ -204,12 +205,13 @@ export async function getProfiles() {
 }
 
 export async function getDashboardData() {
-  const [settings, projects, incomeRecords, posts, currentUser] = await Promise.all([
+  const [settings, projects, incomeRecords, posts, currentUser, visitCount] = await Promise.all([
     getSiteSettings(),
     getProjects(),
     getIncomeRecords(),
     getPosts(5),
     getCurrentSessionUser(),
+    getHomeVisitCount(),
   ]);
 
   const today = new Date();
@@ -280,6 +282,7 @@ export async function getDashboardData() {
       mood: homeState.homeMood,
       tagline: homeState.tagline,
       todayString,
+      visitCount,
     },
     viewer,
     viewerVitals,

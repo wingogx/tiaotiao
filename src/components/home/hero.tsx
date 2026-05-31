@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { BookOpen, Clock3, Compass, Mic, PawPrint, Plus, Send, Settings, Target, UserRound, Zap } from 'lucide-react';
 
 import { incrementHomeVital } from '@/app/actions';
+import { HomeVisitPill } from '@/components/home/home-visit-pill';
 import { normalizeHomeMood } from '@/lib/home/state';
 import { clampPercent, formatCompactCurrency, formatCurrency } from '@/lib/utils/format';
 import type { AwaitedReturn } from '@/types/common';
@@ -63,9 +64,8 @@ export function Hero({ data }: { data: DashboardData }) {
 
       <div className="relative px-5 pb-8 pt-5 md:px-10 lg:px-14">
         <div className="mx-auto flex w-fit flex-wrap items-center justify-center gap-x-8 gap-y-3 rounded-full border border-[var(--neko-line)] bg-white/72 px-7 py-4 text-sm font-bold text-[var(--neko-brown)] shadow-[0_10px_34px_rgba(99,65,54,0.08)] backdrop-blur-md">
-          <StatusDot tone="green" label="Live2D 已加载" />
           <StatusDot tone="rose" label={mood} />
-          <StatusDot tone="green" label="桌面在线" />
+          <HomeVisitPill initialCount={homeStatus.visitCount} />
           <span className="flex items-center gap-2 text-[var(--neko-muted)]"><Clock3 size={18} /> {liveTime}</span>
         </div>
 
