@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { BookOpen, Clock3, Compass, FolderKanban, Mic, PawPrint, Plus, Send, Settings, Sparkles, Target, UserRound, Zap } from 'lucide-react';
+import { BookOpen, Clock3, Compass, Mic, PawPrint, Plus, Send, Settings, Target, UserRound, Zap } from 'lucide-react';
 
 import { incrementHomeVital } from '@/app/actions';
 import { normalizeHomeMood } from '@/lib/home/state';
@@ -19,7 +19,6 @@ const vitalItems = [
 
 export function Hero({ data }: { data: DashboardData }) {
   const { homeStatus, posts, settings, summary, viewer, viewerVitals } = data;
-  const memoryCount = posts.length;
   const remainingDays = Math.max(settings.total_days - summary.currentDay, 0);
   const mood = normalizeHomeMood(homeStatus.mood);
   const moodStyle = getMoodStyle(mood);
@@ -131,8 +130,8 @@ export function Hero({ data }: { data: DashboardData }) {
             />
           </div>
 
-          <aside className="z-10 flex flex-col gap-5 lg:pt-16">
-            <Panel className="min-h-[420px]">
+          <aside className="z-10 flex flex-col gap-5 lg:pt-20">
+            <Panel className="min-h-[520px]">
               <div className="text-sm font-black uppercase tracking-[0.18em] text-[var(--neko-muted)]">当前场景</div>
               <div className="mt-4 text-[1.9rem] font-black leading-tight text-[#171414]">{getSceneHeadline(mood)}</div>
               <p className="mt-4 text-base leading-8 text-[var(--neko-brown)]">{homeStatus.tagline}</p>
@@ -150,18 +149,8 @@ export function Hero({ data }: { data: DashboardData }) {
                   <SummaryRow label="剩余天数" value={`${remainingDays} 天`} />
                 </div>
               </div>
-            </Panel>
-
-            <Panel>
-              <h2 className="text-lg font-black text-[var(--neko-ink)]">快捷动作</h2>
-              <div className="mt-4 space-y-3">
-                <QuickActionRow href="/app/today?tab=tasks" icon={<Sparkles size={20} />} label="去对话" hint="把目标拆成今天的一步" tone="rose" />
-                <QuickActionRow href="/articles" icon={<BookOpen size={20} />} label="查记忆" hint={`${memoryCount} 篇复盘在这里`} tone="orange" />
-                <QuickActionRow href="/app/today?tab=tasks" icon={<Zap size={20} />} label="登记录入" hint="任务、收入、复盘一起写" tone="green" />
-                <QuickActionRow href="/app/projects" icon={<FolderKanban size={20} />} label="同步项目" hint={`${summary.activeProjects} 个项目正在推进`} tone="neutral" />
-              </div>
               <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[var(--neko-line)] pt-5">
-                <SummaryTag label="复盘记录" value={`${memoryCount} 篇`} />
+                <SummaryTag label="复盘记录" value={`${posts.length} 篇`} />
                 <SummaryTag label="进行项目" value={`${summary.activeProjects} 个`} />
               </div>
             </Panel>
@@ -303,40 +292,6 @@ function InlineStageRow({ dot, label, value }: { dot: 'green' | 'rose' | 'orange
       </span>
       <strong className="text-[var(--neko-ink)]">{value}</strong>
     </div>
-  );
-}
-
-function QuickActionRow({
-  href,
-  icon,
-  hint,
-  label,
-  tone,
-}: {
-  href: string;
-  icon: ReactNode;
-  hint: string;
-  label: string;
-  tone: 'rose' | 'orange' | 'green' | 'neutral';
-}) {
-  const toneClass =
-    tone === 'rose'
-      ? 'bg-[#f7dfe4] text-[var(--neko-red)]'
-      : tone === 'orange'
-        ? 'bg-[#fff0de] text-[#e28e32]'
-        : tone === 'green'
-          ? 'bg-[#e3f3ec] text-[#42b485]'
-          : 'bg-[#f6eee8] text-[var(--neko-brown)]';
-
-  return (
-    <Link href={href} className="flex items-center gap-4 rounded-[22px] border border-[var(--neko-line)] bg-white/66 px-4 py-4 transition hover:-translate-y-0.5 hover:bg-white">
-      <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${toneClass}`}>{icon}</span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-sm font-black text-[var(--neko-ink)]">{label}</span>
-        <span className="mt-1 block truncate text-xs text-[var(--neko-muted)]">{hint}</span>
-      </span>
-      <span className="text-lg text-[var(--neko-brown)]">›</span>
-    </Link>
   );
 }
 
