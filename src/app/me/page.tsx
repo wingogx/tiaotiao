@@ -1,13 +1,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { BookOpen, ChevronRight, Coins, Compass, LockKeyhole, ShieldCheck, Target, Zap } from 'lucide-react';
+import { BookOpen, ChevronRight, Coins, Compass, LockKeyhole, LogOut, ShieldCheck, Target, Zap } from 'lucide-react';
 
+import { signOut } from '@/app/actions';
 import { getViewerAccess } from '@/lib/auth/session';
 import { getDashboardData } from '@/lib/data/queries';
 import { formatCurrency, formatPercent } from '@/lib/utils/format';
 
 import { MobileAppShell } from '@/components/mobile/mobile-app-shell';
+import { Button } from '@/components/ui/button';
 
 export default async function MePage() {
   const [viewer, data] = await Promise.all([getViewerAccess(), getDashboardData()]);
@@ -39,6 +41,15 @@ export default async function MePage() {
               <AssetChip icon={<Compass size={19} />} label="进行项目" value={`${activeProjects} 个`} />
               <AssetChip icon={<BookOpen size={19} />} label="复盘文章" value={`${data.posts.length} 篇`} />
             </div>
+
+            {viewer.profile ? (
+              <form action={signOut} className="mt-5">
+                <Button fullWidth variant="secondary" className="h-12 rounded-[20px] font-black">
+                  <LogOut size={16} />
+                  退出登录
+                </Button>
+              </form>
+            ) : null}
           </section>
 
           <section className="overflow-hidden rounded-[32px] border border-[var(--neko-line)] bg-white/78 shadow-[0_14px_34px_rgba(93,65,57,0.08)] backdrop-blur-xl">
