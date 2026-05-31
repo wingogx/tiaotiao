@@ -5,7 +5,7 @@ import { BookOpen, Clock3, Compass, FolderKanban, Mic, PawPrint, Plus, Send, Set
 
 import { incrementHomeVital } from '@/app/actions';
 import { normalizeHomeMood } from '@/lib/home/state';
-import { clampPercent, formatCompactCurrency, formatCurrency, formatPercent } from '@/lib/utils/format';
+import { clampPercent, formatCompactCurrency, formatCurrency } from '@/lib/utils/format';
 import type { AwaitedReturn } from '@/types/common';
 
 type DashboardData = AwaitedReturn<typeof import('@/lib/data/queries').getDashboardData>;
@@ -18,10 +18,9 @@ const vitalItems = [
 ] as const;
 
 export function Hero({ data }: { data: DashboardData }) {
-  const { homeStatus, posts, projectTotals, settings, summary, viewer, viewerVitals } = data;
+  const { homeStatus, posts, settings, summary, viewer, viewerVitals } = data;
   const memoryCount = posts.length;
   const remainingDays = Math.max(settings.total_days - summary.currentDay, 0);
-  const projectActivity = projectTotals.length > 0 ? clampPercent((summary.activeProjects / projectTotals.length) * 100) : 0;
   const mood = normalizeHomeMood(homeStatus.mood);
   const moodStyle = getMoodStyle(mood);
   const liveTime = new Intl.DateTimeFormat('zh-CN', {
@@ -71,7 +70,7 @@ export function Hero({ data }: { data: DashboardData }) {
           <span className="flex items-center gap-2 text-[var(--neko-muted)]"><Clock3 size={18} /> {liveTime}</span>
         </div>
 
-        <div className="grid min-h-[980px] gap-6 pt-8 lg:grid-cols-[290px_minmax(320px,1fr)_290px] xl:grid-cols-[310px_minmax(360px,1fr)_310px]">
+        <div className="grid min-h-[980px] gap-6 pt-8 lg:grid-cols-[292px_minmax(320px,1fr)_332px] xl:grid-cols-[312px_minmax(360px,1fr)_356px]">
           <aside className="z-10 flex flex-col gap-5 lg:pt-16">
             <Panel className="min-h-[232px]">
               <div className="flex items-center gap-3 text-sm font-bold text-[var(--neko-muted)]">
@@ -115,15 +114,6 @@ export function Hero({ data }: { data: DashboardData }) {
               </div>
             </Panel>
 
-            <Panel>
-              <h2 className="text-lg font-black text-[var(--neko-ink)]">关爱账本</h2>
-              <div className="mt-4 space-y-3">
-                <SummaryRow label="今日互动" value={`${todayCareTotal} 次`} />
-                <SummaryRow label="第几天" value={`Day ${summary.currentDay}`} />
-                <SummaryRow label="今日收入" value={formatCurrency(summary.todayRevenue)} />
-                <SummaryRow label="剩余天数" value={`${remainingDays} 天`} />
-              </div>
-            </Panel>
           </aside>
 
           <div className="relative order-first flex min-h-[640px] items-end justify-center md:min-h-[760px] lg:order-none lg:min-h-[980px]">
@@ -142,7 +132,7 @@ export function Hero({ data }: { data: DashboardData }) {
           </div>
 
           <aside className="z-10 flex flex-col gap-5 lg:pt-16">
-            <Panel className="min-h-[232px]">
+            <Panel className="min-h-[420px]">
               <div className="text-sm font-black uppercase tracking-[0.18em] text-[var(--neko-muted)]">当前场景</div>
               <div className="mt-4 text-[1.9rem] font-black leading-tight text-[#171414]">{getSceneHeadline(mood)}</div>
               <p className="mt-4 text-base leading-8 text-[var(--neko-brown)]">{homeStatus.tagline}</p>
@@ -150,6 +140,15 @@ export function Hero({ data }: { data: DashboardData }) {
                 <InlineStageRow dot="green" label="总目标" value={formatCompactCurrency(settings.total_target)} />
                 <InlineStageRow dot="rose" label="累计收入" value={formatCompactCurrency(summary.totalRevenue)} />
                 <InlineStageRow dot="orange" label="今日状态" value={mood} />
+              </div>
+              <div className="mt-6 border-t border-[var(--neko-line)] pt-6">
+                <div className="mb-4 text-lg font-black text-[var(--neko-ink)]">关爱账本</div>
+                <div className="space-y-3">
+                  <SummaryRow label="今日互动" value={`${todayCareTotal} 次`} />
+                  <SummaryRow label="第几天" value={`Day ${summary.currentDay}`} />
+                  <SummaryRow label="今日收入" value={formatCurrency(summary.todayRevenue)} />
+                  <SummaryRow label="剩余天数" value={`${remainingDays} 天`} />
+                </div>
               </div>
             </Panel>
 
@@ -159,20 +158,11 @@ export function Hero({ data }: { data: DashboardData }) {
                 <QuickActionRow href="/app/today?tab=tasks" icon={<Sparkles size={20} />} label="去对话" hint="把目标拆成今天的一步" tone="rose" />
                 <QuickActionRow href="/articles" icon={<BookOpen size={20} />} label="查记忆" hint={`${memoryCount} 篇复盘在这里`} tone="orange" />
                 <QuickActionRow href="/app/today?tab=tasks" icon={<Zap size={20} />} label="登记录入" hint="任务、收入、复盘一起写" tone="green" />
-                <QuickActionRow href="/app/projects" icon={<FolderKanban size={20} />} label="同步项目" hint="追踪正在推进的副本" tone="neutral" />
+                <QuickActionRow href="/app/projects" icon={<FolderKanban size={20} />} label="同步项目" hint={`${summary.activeProjects} 个项目正在推进`} tone="neutral" />
               </div>
-            </Panel>
-
-            <Panel>
-              <h2 className="text-lg font-black text-[var(--neko-ink)]">挑战状态</h2>
-              <div className="mt-5 space-y-4">
-                <CareBar label="收入进度" value={summary.incomeProgress} color="green" />
-                <CareBar label="时间进度" value={summary.timeProgress} color="red" />
-                <CareBar label="项目活跃" value={projectActivity} color="orange" />
-              </div>
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <MiniStat label="复盘记录" value={`${memoryCount} 篇`} />
-                <MiniStat label="进行项目" value={`${summary.activeProjects} 个`} />
+              <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[var(--neko-line)] pt-5">
+                <SummaryTag label="复盘记录" value={`${memoryCount} 篇`} />
+                <SummaryTag label="进行项目" value={`${summary.activeProjects} 个`} />
               </div>
             </Panel>
           </aside>
@@ -316,26 +306,6 @@ function InlineStageRow({ dot, label, value }: { dot: 'green' | 'rose' | 'orange
   );
 }
 
-function CareBar({ label, value, color }: { label: string; value: number; color: 'green' | 'red' | 'orange' }) {
-  const colors = {
-    green: 'bg-[#4abc91]',
-    red: 'bg-[#f05262]',
-    orange: 'bg-[#eea13d]',
-  };
-
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between text-sm text-[var(--neko-brown)]">
-        <span>{label}</span>
-        <strong className="text-[var(--neko-ink)]">{formatPercent(value)}</strong>
-      </div>
-      <div className="h-3 overflow-hidden rounded-full bg-[#e5d8d0]">
-        <span className={`block h-full rounded-full ${colors[color]}`} style={{ width: `${value}%` }} />
-      </div>
-    </div>
-  );
-}
-
 function QuickActionRow({
   href,
   icon,
@@ -370,7 +340,7 @@ function QuickActionRow({
   );
 }
 
-function MiniStat({ label, value }: { label: string; value: string }) {
+function SummaryTag({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[20px] border border-[var(--neko-line)] bg-white/62 px-4 py-4">
       <div className="text-xs text-[var(--neko-muted)]">{label}</div>
