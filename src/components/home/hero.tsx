@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { BookOpen, Clock3, Compass, FolderKanban, PawPrint, Plus, Settings, Sparkles, Target, UserRound, Zap } from 'lucide-react';
+import { BookOpen, Clock3, Compass, FolderKanban, Mic, PawPrint, Plus, Send, Settings, Sparkles, Target, UserRound, Zap } from 'lucide-react';
 
 import { incrementHomeVital } from '@/app/actions';
 import { normalizeHomeMood } from '@/lib/home/state';
@@ -11,10 +11,10 @@ import type { AwaitedReturn } from '@/types/common';
 type DashboardData = AwaitedReturn<typeof import('@/lib/data/queries').getDashboardData>;
 
 const vitalItems = [
-  { key: 'share', label: '状态分享', hint: '把今天想说的话留下来' },
-  { key: 'food', label: '饮食', hint: '吃到一顿舒服的饭也算进展' },
-  { key: 'health', label: '健康', hint: '休息、运动、喝水都算照顾自己' },
-  { key: 'energy', label: '活力', hint: '哪怕只推进一点，也是在回血' },
+  { key: 'share', label: '状态分享', hint: '说一句今天的心事', bar: 'bg-[#4abc91]' },
+  { key: 'food', label: '饮食', hint: '吃到一顿舒服的饭', bar: 'bg-[#f0a455]' },
+  { key: 'health', label: '健康', hint: '把自己照顾好一点', bar: 'bg-[#df6f78]' },
+  { key: 'energy', label: '活力', hint: '哪怕只推进一点点', bar: 'bg-[#f28d3a]' },
 ] as const;
 
 export function Hero({ data }: { data: DashboardData }) {
@@ -43,7 +43,9 @@ export function Hero({ data }: { data: DashboardData }) {
       hour12: false,
     }).format(new Date()),
   );
-  const dayGreeting = hour < 11 ? '早安' : hour < 18 ? '下午好' : '晚上好';
+  const heroHeadline = getHeroHeadline(hour);
+  const viewerName = viewer?.displayName ?? viewer?.email?.split('@')[0] ?? '你';
+  const todayCareTotal = (viewerVitals?.share ?? 0) + (viewerVitals?.food ?? 0) + (viewerVitals?.health ?? 0) + (viewerVitals?.energy ?? 0);
 
   return (
     <section className="neko-screen mx-auto mt-0 min-h-screen max-w-[1360px] overflow-hidden rounded-b-[28px] border border-[var(--neko-line)] bg-[var(--neko-bg)] shadow-[0_28px_90px_rgba(83,58,48,0.14)]">
@@ -61,37 +63,73 @@ export function Hero({ data }: { data: DashboardData }) {
         </Link>
       </div>
 
-      <div className="relative px-5 pb-8 pt-5 md:px-10 lg:px-16">
-        <div className="mx-auto flex w-fit flex-wrap items-center justify-center gap-x-7 gap-y-3 rounded-full border border-[var(--neko-line)] bg-white/72 px-6 py-4 text-sm font-bold text-[var(--neko-brown)] shadow-[0_10px_34px_rgba(99,65,54,0.08)] backdrop-blur-md md:text-base">
-          <StatusDot tone="green" label="收入引擎已加载" />
-          <StatusDot tone="rose" label="复盘在线" />
-          <StatusDot tone="green" label="挑战在线" />
+      <div className="relative px-5 pb-8 pt-5 md:px-10 lg:px-14">
+        <div className="mx-auto flex w-fit flex-wrap items-center justify-center gap-x-8 gap-y-3 rounded-full border border-[var(--neko-line)] bg-white/72 px-7 py-4 text-sm font-bold text-[var(--neko-brown)] shadow-[0_10px_34px_rgba(99,65,54,0.08)] backdrop-blur-md">
+          <StatusDot tone="green" label="Live2D 已加载" />
+          <StatusDot tone="rose" label={mood} />
+          <StatusDot tone="green" label="桌面在线" />
           <span className="flex items-center gap-2 text-[var(--neko-muted)]"><Clock3 size={18} /> {liveTime}</span>
-          <MoodChip mood={mood} style={moodStyle} compact />
         </div>
 
-        <div className="grid gap-6 pt-10 lg:grid-cols-[340px_minmax(360px,1fr)_340px] lg:items-start">
-          <aside className="space-y-6">
-            <Panel className="min-h-[320px]">
-              <div className="text-lg font-bold text-[var(--neko-ink)]">
-                第 {summary.currentDay} 天 <span className="ml-3 text-[var(--neko-red)]">实盘记录中</span>
+        <div className="grid min-h-[980px] gap-6 pt-8 lg:grid-cols-[290px_minmax(320px,1fr)_290px] xl:grid-cols-[310px_minmax(360px,1fr)_310px]">
+          <aside className="z-10 flex flex-col gap-5 lg:pt-16">
+            <Panel className="min-h-[232px]">
+              <div className="flex items-center gap-3 text-sm font-bold text-[var(--neko-muted)]">
+                <span className="rounded-full border border-[var(--neko-line)] bg-white/72 px-3 py-1">{todayLabel}</span>
+                <span>{homeStatus.todayString}</span>
               </div>
-              <h1 className="mt-7 text-3xl font-black leading-tight tracking-normal text-[#151719] md:text-4xl">
-                1000天
+              <h1 className="mt-5 text-[2rem] font-black leading-tight text-[#171414]">
+                {heroHeadline}
                 <br />
-                赚到
-                <br />
-                1000万
+                Lumia
               </h1>
-              <p className="mt-7 max-w-[240px] text-lg leading-9 text-[var(--neko-brown)]">
-                今天只做三件事：记收入、勾任务、写复盘。Lumia 会把它们变成挑战进度。
-              </p>
+              <p className="mt-4 text-base leading-8 text-[var(--neko-brown)]">{getMoodCopy(mood)}</p>
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <MoodChip mood={mood} style={moodStyle} />
+              </div>
+            </Panel>
+
+            <Panel>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-black text-[var(--neko-ink)]">今天的状态</h2>
+                  <p className="mt-1 text-sm text-[var(--neko-muted)]">
+                    {viewer ? `${viewerName} 可以直接点 + 记录今天。` : '登录后可以给今天的四项状态逐一加分。'}
+                  </p>
+                </div>
+                <span className="rounded-full bg-[#fff3e4] px-3 py-2 text-xs font-black text-[#d98a2b]">{viewer ? '已登录' : '去登录'}</span>
+              </div>
+
+              <div className="mt-5 space-y-4">
+                {vitalItems.map((item) => (
+                  <VitalMeterRow
+                    key={item.key}
+                    barClassName={item.bar}
+                    enabled={Boolean(viewer)}
+                    hint={item.hint}
+                    label={item.label}
+                    metric={item.key}
+                    value={viewerVitals?.[item.key] ?? 0}
+                  />
+                ))}
+              </div>
+            </Panel>
+
+            <Panel>
+              <h2 className="text-lg font-black text-[var(--neko-ink)]">关爱账本</h2>
+              <div className="mt-4 space-y-3">
+                <SummaryRow label="今日互动" value={`${todayCareTotal} 次`} />
+                <SummaryRow label="第几天" value={`Day ${summary.currentDay}`} />
+                <SummaryRow label="今日收入" value={formatCurrency(summary.todayRevenue)} />
+                <SummaryRow label="剩余天数" value={`${remainingDays} 天`} />
+              </div>
             </Panel>
           </aside>
 
-          <div className="relative order-first flex min-h-[520px] items-start justify-center md:min-h-[720px] lg:order-none lg:min-h-[860px]">
+          <div className="relative order-first flex min-h-[640px] items-end justify-center md:min-h-[760px] lg:order-none lg:min-h-[980px]">
             <div className="neko-room-glow" />
-            <div className="absolute top-8 h-[660px] w-[660px] rounded-full bg-[radial-gradient(circle,rgba(255,227,196,0.48),rgba(255,246,239,0)_64%)]" />
+            <div className="absolute inset-x-10 top-10 bottom-24 rounded-[140px] bg-[radial-gradient(circle_at_center,rgba(255,237,214,0.46),rgba(255,244,234,0)_70%)]" />
+            <div className="absolute bottom-12 h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle,rgba(204,171,137,0.18),rgba(255,241,229,0)_68%)]" />
             <Image
               src="/assets/companion-lumia-stage-cutout.png"
               alt="Lumia 养成伙伴"
@@ -99,113 +137,61 @@ export function Hero({ data }: { data: DashboardData }) {
               height={1060}
               unoptimized
               priority
-              className="neko-avatar relative z-10 mt-2 h-[580px] w-auto max-w-[82vw] object-contain md:h-[820px] lg:h-[860px]"
+              className="neko-avatar relative z-10 h-[620px] w-auto max-w-[82vw] object-contain md:h-[820px] lg:h-[930px]"
             />
           </div>
 
-          <aside className="space-y-6">
-            <Panel className="min-h-[320px]">
-              <div className="text-lg font-bold text-[var(--neko-ink)]">
-                1000 DAY STAGE <span className="ml-3 text-[var(--neko-red)]">运行中</span>
+          <aside className="z-10 flex flex-col gap-5 lg:pt-16">
+            <Panel className="min-h-[232px]">
+              <div className="text-sm font-black uppercase tracking-[0.18em] text-[var(--neko-muted)]">当前场景</div>
+              <div className="mt-4 text-[1.9rem] font-black leading-tight text-[#171414]">{getSceneHeadline(mood)}</div>
+              <p className="mt-4 text-base leading-8 text-[var(--neko-brown)]">{homeStatus.tagline}</p>
+              <div className="mt-5 space-y-3">
+                <InlineStageRow dot="green" label="总目标" value={formatCompactCurrency(settings.total_target)} />
+                <InlineStageRow dot="rose" label="累计收入" value={formatCompactCurrency(summary.totalRevenue)} />
+                <InlineStageRow dot="orange" label="今日状态" value={mood} />
               </div>
-              <h2 className="mt-6 text-2xl font-black leading-snug text-[#111418]">
-                1000天赚1000万
-                <br />
-                实盘挑战
-              </h2>
-              <div className="mt-6 space-y-4">
-                <StagePill dot="green" label="总目标" value={formatCompactCurrency(settings.total_target)} />
-                <StagePill dot="rose" label="累计" value={formatCompactCurrency(summary.totalRevenue)} />
-                <StagePill dot="orange" label="缺口" value={formatCompactCurrency(summary.gapToGoal)} />
+            </Panel>
+
+            <Panel>
+              <h2 className="text-lg font-black text-[var(--neko-ink)]">快捷动作</h2>
+              <div className="mt-4 space-y-3">
+                <QuickActionRow href="/app/today?tab=tasks" icon={<Sparkles size={20} />} label="去对话" hint="把目标拆成今天的一步" tone="rose" />
+                <QuickActionRow href="/articles" icon={<BookOpen size={20} />} label="查记忆" hint={`${memoryCount} 篇复盘在这里`} tone="orange" />
+                <QuickActionRow href="/app/today?tab=tasks" icon={<Zap size={20} />} label="登记录入" hint="任务、收入、复盘一起写" tone="green" />
+                <QuickActionRow href="/app/projects" icon={<FolderKanban size={20} />} label="同步项目" hint="追踪正在推进的副本" tone="neutral" />
+              </div>
+            </Panel>
+
+            <Panel>
+              <h2 className="text-lg font-black text-[var(--neko-ink)]">挑战状态</h2>
+              <div className="mt-5 space-y-4">
+                <CareBar label="收入进度" value={summary.incomeProgress} color="green" />
+                <CareBar label="时间进度" value={summary.timeProgress} color="red" />
+                <CareBar label="项目活跃" value={projectActivity} color="orange" />
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <MiniStat label="复盘记录" value={`${memoryCount} 篇`} />
+                <MiniStat label="进行项目" value={`${summary.activeProjects} 个`} />
               </div>
             </Panel>
           </aside>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
-          <Panel>
-            <div className="text-sm font-black uppercase tracking-[0.18em] text-[var(--neko-muted)]">Today Mood</div>
-            <div className="mt-4 flex items-center justify-between gap-4">
-              <MoodChip mood={mood} style={moodStyle} />
-              <span className="rounded-full border border-[var(--neko-line)] bg-white/74 px-3 py-2 text-sm font-bold text-[var(--neko-brown)]">
-                {homeStatus.todayString}
-              </span>
+        <div className="relative z-20 mx-auto mt-1 max-w-[980px]">
+          <div className="rounded-[34px] border border-[var(--neko-line)] bg-white/78 p-3 shadow-[0_18px_46px_rgba(93,65,57,0.11)] backdrop-blur-xl">
+            <div className="flex items-center gap-3 rounded-full bg-white/86 px-4 py-3">
+              <span className="rounded-full bg-[#f7dfe4] px-3 py-2 text-sm font-black text-[var(--neko-red)]">跟 Lumia</span>
+              <span className="min-w-0 flex-1 truncate text-sm text-[var(--neko-muted)]">{viewer ? `${viewerName}，今天想先说哪件事？` : '说点什么，把今天的状态留下来...'}</span>
+              <Mic size={18} className="hidden text-[var(--neko-muted)] sm:block" />
+              <Link href="/app/today?tab=tasks" className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--neko-red)] text-white shadow-[0_12px_26px_rgba(201,101,113,0.24)] transition hover:-translate-y-0.5 hover:bg-[#b95766]">
+                <Send size={16} />
+              </Link>
             </div>
-            <div className="mt-5 text-3xl font-black leading-tight text-[var(--neko-ink)]">
-              {dayGreeting}，
-              <br />
-              今天也先和自己站在一边。
-            </div>
-            <p className="mt-4 text-base leading-8 text-[var(--neko-brown)]">{getMoodCopy(mood)}</p>
-            <div className="mt-5 text-sm text-[var(--neko-muted)]">
-              {todayLabel} · {homeStatus.tagline}
-            </div>
-          </Panel>
-
-          <Panel>
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-sm font-black uppercase tracking-[0.18em] text-[var(--neko-muted)]">Daily Check-In</div>
-                <div className="mt-3 text-2xl font-black text-[var(--neko-ink)]">
-                  {viewer?.displayName ?? viewer?.email?.split('@')[0] ?? '今天的状态补给'}
-                </div>
-                <p className="mt-2 text-sm leading-7 text-[var(--neko-brown)]">
-                  {viewer ? '每点一次 +，都会给你今天的状态记上一格。' : '登录后可以给今天的状态、饮食、健康和活力逐项 +1。'}
-                </p>
-              </div>
-              <span className="rounded-full bg-[#fff3e4] px-3 py-2 text-sm font-black text-[#d98a2b]">
-                {viewer ? '已登录' : '未登录'}
-              </span>
-            </div>
-
-            <div className="mt-6 space-y-3">
-              {vitalItems.map((item) => (
-                <VitalRow
-                  key={item.key}
-                  label={item.label}
-                  hint={item.hint}
-                  metric={item.key}
-                  value={viewerVitals?.[item.key] ?? 0}
-                  enabled={Boolean(viewer)}
-                />
-              ))}
-            </div>
-          </Panel>
-
-          <Panel>
-            <h2 className="mb-6 text-xl font-bold text-[var(--neko-ink)]">挑战状态</h2>
-            <CareBar label="收入进度" value={summary.incomeProgress} color="green" />
-            <CareBar label="时间进度" value={summary.timeProgress} color="red" />
-            <CareBar label="项目活跃" value={projectActivity} color="orange" />
-          </Panel>
-
-          <Panel>
-            <h2 className="mb-5 text-xl font-bold text-[var(--neko-ink)]">今日账本</h2>
-            <RhythmRow label="累计收入" value={formatCurrency(summary.totalRevenue)} />
-            <RhythmRow label="今日收入" value={formatCurrency(summary.todayRevenue)} />
-            <RhythmRow label="剩余天数" value={`${remainingDays} 天`} />
-            <RhythmRow label="复盘记录" value={`${memoryCount} 篇`} />
-          </Panel>
+          </div>
         </div>
 
-        <Panel className="mt-6">
-          <div className="mb-6 flex items-center justify-between gap-4">
-            <div>
-              <div className="text-sm font-black uppercase tracking-[0.18em] text-[var(--neko-muted)]">Quick Actions</div>
-              <div className="mt-2 text-2xl font-black text-[var(--neko-ink)]">今天先从最小的一步开始</div>
-            </div>
-            <Link href="/app/today?tab=tasks" className="hidden rounded-full border border-[var(--neko-line)] bg-white/78 px-4 py-2 text-sm font-black text-[var(--neko-brown)] transition hover:bg-white md:inline-flex">
-              进入今日录入
-            </Link>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            <QuickAction href="/app/today?tab=tasks" icon={<Sparkles size={24} />} title="今日录入" subtitle="任务 / 收入 / 复盘" tone="rose" />
-            <QuickAction href="/articles" icon={<BookOpen size={24} />} title="每日复盘" subtitle={`${memoryCount} 篇记录`} tone="orange" />
-            <QuickAction href="/app/projects" icon={<FolderKanban size={24} />} title="项目看板" subtitle={`${summary.activeProjects} 个进行中`} tone="green" />
-          </div>
-        </Panel>
-
-        <div className="relative z-20 mx-auto mt-6 max-w-[1088px]">
+        <div className="relative z-20 mx-auto mt-5 max-w-[1088px]">
           <nav className="neko-dock">
             <DockItem href="/" icon={<PawPrint size={31} />} label="首页" active />
             <DockItem href="/app/progress" icon={<Target size={31} />} label="进度" />
@@ -236,70 +222,96 @@ function Panel({ children, className = '' }: { children: ReactNode; className?: 
 function MoodChip({
   mood,
   style,
-  compact = false,
 }: {
   mood: string;
   style: { text: string; dot: string; surface: string };
-  compact?: boolean;
 }) {
   return (
-    <span
-      data-testid={compact ? 'home-mood-chip-compact' : 'home-mood-chip'}
-      className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 font-black ${style.surface} ${style.text} ${compact ? 'text-sm' : 'text-base'}`}
-    >
+    <span data-testid="home-mood-chip" className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 font-black ${style.surface} ${style.text} text-sm`}>
       <span className={`h-2.5 w-2.5 rounded-full ${style.dot}`} />
       当前精神状态：{mood}
     </span>
   );
 }
 
-function VitalRow({
+function VitalMeterRow({
+  barClassName,
   enabled,
   hint,
   label,
   metric,
   value,
 }: {
+  barClassName: string;
   enabled: boolean;
   hint: string;
   label: string;
   metric: (typeof vitalItems)[number]['key'];
   value: number;
 }) {
-  return (
-    <div data-testid={`home-vital-${metric}`} className="flex items-center gap-3 rounded-[24px] border border-[var(--neko-line)] bg-white/68 px-4 py-4">
-      <div className="min-w-0 flex-1">
-        <div className="text-base font-black text-[var(--neko-ink)]">{label}</div>
-        <div className="mt-1 text-sm text-[var(--neko-muted)]">{hint}</div>
-      </div>
+  const progress = clampPercent(value * 18);
 
-      <div className="flex items-center gap-2">
-        <span data-testid={`home-vital-${metric}-value`} className="inline-flex min-w-[56px] items-center justify-center rounded-full border border-[var(--neko-line)] bg-white/84 px-3 py-2 text-lg font-black text-[var(--neko-ink)]">
-          {value}
-        </span>
-        {enabled ? (
-          <form action={incrementHomeVital}>
-            <input type="hidden" name="metric" value={metric} />
-            <button
-              type="submit"
+  return (
+    <div data-testid={`home-vital-${metric}`} className="space-y-2.5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-sm font-black text-[var(--neko-ink)]">{label}</div>
+          <div className="mt-0.5 text-xs text-[var(--neko-muted)]">{hint}</div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span data-testid={`home-vital-${metric}-value`} className="min-w-[40px] text-right text-sm font-black text-[var(--neko-ink)]">
+            {value}
+          </span>
+          {enabled ? (
+            <form action={incrementHomeVital}>
+              <input type="hidden" name="metric" value={metric} />
+              <button
+                type="submit"
+                data-testid={`home-vital-${metric}-button`}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-[var(--neko-red)] shadow-[0_10px_22px_rgba(93,65,57,0.12)] transition hover:-translate-y-0.5 hover:bg-[#fff7f3]"
+                aria-label={`增加${label}`}
+              >
+                <Plus size={16} />
+              </button>
+            </form>
+          ) : (
+            <Link
+              href="/login?next=/"
               data-testid={`home-vital-${metric}-button`}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--neko-red)] text-white shadow-[0_12px_28px_rgba(201,101,113,0.24)] transition hover:-translate-y-0.5 hover:bg-[#b95766]"
-              aria-label={`增加${label}`}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-[var(--neko-red)] shadow-[0_10px_22px_rgba(93,65,57,0.12)] transition hover:-translate-y-0.5 hover:bg-[#fff7f3]"
+              aria-label={`登录后记录${label}`}
             >
-              <Plus size={18} />
-            </button>
-          </form>
-        ) : (
-          <Link
-            href="/login?next=/"
-            data-testid={`home-vital-${metric}-button`}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--neko-line)] bg-white/84 text-[var(--neko-brown)] transition hover:bg-white"
-            aria-label={`登录后记录${label}`}
-          >
-            <Plus size={18} />
-          </Link>
-        )}
+              <Plus size={16} />
+            </Link>
+          )}
+        </div>
       </div>
+      <div className="h-2.5 overflow-hidden rounded-full bg-[#e5d8d0]">
+        <span className={`block h-full rounded-full ${barClassName}`} style={{ width: `${progress}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-[18px] border border-[var(--neko-line)] bg-white/62 px-4 py-3 text-sm">
+      <span className="text-[var(--neko-brown)]">{label}</span>
+      <strong className="text-[var(--neko-ink)]">{value}</strong>
+    </div>
+  );
+}
+
+function InlineStageRow({ dot, label, value }: { dot: 'green' | 'rose' | 'orange'; label: string; value: string }) {
+  const dotClass = dot === 'green' ? 'bg-[#4abc91]' : dot === 'rose' ? 'bg-[var(--neko-red)]' : 'bg-[#eea13d]';
+
+  return (
+    <div className="flex items-center justify-between rounded-[18px] border border-[var(--neko-line)] bg-white/66 px-4 py-3 text-sm">
+      <span className="flex items-center gap-2 text-[var(--neko-brown)]">
+        <span className={`h-2.5 w-2.5 rounded-full ${dotClass}`} />
+        {label}
+      </span>
+      <strong className="text-[var(--neko-ink)]">{value}</strong>
     </div>
   );
 }
@@ -312,68 +324,58 @@ function CareBar({ label, value, color }: { label: string; value: number; color:
   };
 
   return (
-    <div className="mb-5 last:mb-0">
-      <div className="mb-3 flex items-center justify-between text-lg text-[var(--neko-brown)]">
+    <div>
+      <div className="mb-2 flex items-center justify-between text-sm text-[var(--neko-brown)]">
         <span>{label}</span>
-        <strong className="text-[#111418]">{formatPercent(value)}</strong>
+        <strong className="text-[var(--neko-ink)]">{formatPercent(value)}</strong>
       </div>
-      <div className="h-3 overflow-hidden rounded-full bg-[#ded3cd]">
+      <div className="h-3 overflow-hidden rounded-full bg-[#e5d8d0]">
         <span className={`block h-full rounded-full ${colors[color]}`} style={{ width: `${value}%` }} />
       </div>
     </div>
   );
 }
 
-function RhythmRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-2 text-lg">
-      <span className="text-[var(--neko-brown)]">{label}</span>
-      <strong className="text-right text-[#111418]">{value}</strong>
-    </div>
-  );
-}
-
-function StagePill({ dot, label, value }: { dot: 'green' | 'rose' | 'orange'; label: string; value: string }) {
-  const dotClass = dot === 'green' ? 'bg-[#4abc91]' : dot === 'rose' ? 'bg-[var(--neko-red)]' : 'bg-[#eea13d]';
-
-  return (
-    <div className="flex h-[58px] items-center justify-between rounded-[18px] border border-[var(--neko-line)] bg-white/62 px-5 text-lg">
-      <span className="flex items-center gap-3 text-[var(--neko-brown)]">
-        <span className={`h-3 w-3 rounded-full ${dotClass}`} />
-        {label}
-      </span>
-      <strong className="text-[#111418]">{value}</strong>
-    </div>
-  );
-}
-
-function QuickAction({
+function QuickActionRow({
   href,
   icon,
-  subtitle,
-  title,
+  hint,
+  label,
   tone,
 }: {
   href: string;
   icon: ReactNode;
-  subtitle: string;
-  title: string;
-  tone: 'rose' | 'orange' | 'green';
+  hint: string;
+  label: string;
+  tone: 'rose' | 'orange' | 'green' | 'neutral';
 }) {
-  const tones = {
-    rose: 'bg-[#f7dfe4] text-[var(--neko-red)]',
-    orange: 'bg-[#fff0de] text-[#e28e32]',
-    green: 'bg-[#e3f3ec] text-[#42b485]',
-  };
+  const toneClass =
+    tone === 'rose'
+      ? 'bg-[#f7dfe4] text-[var(--neko-red)]'
+      : tone === 'orange'
+        ? 'bg-[#fff0de] text-[#e28e32]'
+        : tone === 'green'
+          ? 'bg-[#e3f3ec] text-[#42b485]'
+          : 'bg-[#f6eee8] text-[var(--neko-brown)]';
 
   return (
-    <Link href={href} className="flex min-h-[136px] flex-col justify-between rounded-[26px] border border-[var(--neko-line)] bg-white/68 p-5 transition hover:-translate-y-1 hover:bg-white">
-      <span className={`flex h-14 w-14 items-center justify-center rounded-full ${tones[tone]}`}>{icon}</span>
-      <span className="mt-5 block">
-        <span className="block text-xl font-black text-[#111418]">{title}</span>
-        <span className="mt-2 block text-sm text-[var(--neko-muted)]">{subtitle}</span>
+    <Link href={href} className="flex items-center gap-4 rounded-[22px] border border-[var(--neko-line)] bg-white/66 px-4 py-4 transition hover:-translate-y-0.5 hover:bg-white">
+      <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${toneClass}`}>{icon}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-black text-[var(--neko-ink)]">{label}</span>
+        <span className="mt-1 block truncate text-xs text-[var(--neko-muted)]">{hint}</span>
       </span>
+      <span className="text-lg text-[var(--neko-brown)]">›</span>
     </Link>
+  );
+}
+
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[20px] border border-[var(--neko-line)] bg-white/62 px-4 py-4">
+      <div className="text-xs text-[var(--neko-muted)]">{label}</div>
+      <div className="mt-2 text-lg font-black text-[var(--neko-ink)]">{value}</div>
+    </div>
   );
 }
 
@@ -386,20 +388,44 @@ function DockItem({ href, icon, label, active = false }: { href: string; icon: R
   );
 }
 
+function getHeroHeadline(hour: number) {
+  if (hour < 6) return '夜深了...';
+  if (hour < 11) return '早安了...';
+  if (hour < 18) return '下午好...';
+  return '晚上好...';
+}
+
 function getMoodCopy(mood: string) {
   switch (mood) {
     case '开心':
-      return '开心的时候就把这股顺手的劲留住，今天再推进一小步，会比昨天更亮。';
+      return '今天的情绪是亮的，顺着这股劲把眼前的一小步走完，整天都会更轻。';
     case '乐观':
-      return '你今天的底色偏亮，先别急着怀疑自己，把眼前这一段路踏稳就够了。';
+      return '你现在的底色偏稳，先别急着看太远，把今天该做的那一步踏实落地。';
     case '焦虑':
-      return '不用一次把所有事都想明白，先完成最小的一步，心会慢慢落下来。';
+      return '不用一口气把所有事都想明白，先让自己安静下来，再做最小的动作。';
     case '沮丧':
-      return '低落不是退步，只是暂时有点累。今天先照顾好自己，再去碰世界。';
+      return '低落不代表停住了，先把自己照顾好，今天能完成一点点就够了。';
     case '痛苦':
-      return '今天能撑住、能呼吸、能完成一点点，就已经很不容易了，Lumia 会陪着你。';
+      return '今天只要还在撑、还在呼吸、还在往前挪一点点，就已经很不容易。';
     default:
-      return '先慢一点也没关系，把今天过稳，把最小的动作做完，情绪就会有落点。';
+      return '先慢一点也没关系，把今天过稳，把最小的一步做出来，状态就会重新回来。';
+  }
+}
+
+function getSceneHeadline(mood: string) {
+  switch (mood) {
+    case '开心':
+      return '她现在像一束亮一点的光，陪你把今天往前拨一格。';
+    case '乐观':
+      return '她应该是桌面上一直陪着你的主角，安静，但在给你撑着场。';
+    case '焦虑':
+      return '她会提醒你先别慌，把手头这一件做好，比什么都重要。';
+    case '沮丧':
+      return '她今天更像安静坐在旁边的人，不催你，只陪你一点点缓过来。';
+    case '痛苦':
+      return '她现在存在的意义，不是催你赢，而是陪你先把今天熬过去。';
+    default:
+      return '她应该是桌面上一直陪着你的主角，陪你把情绪放稳，再慢慢往前。';
   }
 }
 
