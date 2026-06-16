@@ -1,4 +1,4 @@
-import { addDays, subDays } from 'date-fns';
+import { subDays } from 'date-fns';
 
 import { getCurrentSessionUser } from '@/lib/auth/session';
 import { emptyUserHomeVitals, parseSiteHomeState, parseUserHomeVitals } from '@/lib/home/state';
@@ -81,18 +81,6 @@ export type PostComment = {
   body: string;
   created_at: string;
   profiles?: Pick<ProfileSummary, 'display_name' | 'email'> | null;
-};
-
-export type GrowthDay = {
-  day: number;
-  status: 'future' | 'profit' | 'loss' | 'flat' | 'today';
-};
-
-export type StageReport = {
-  label: string;
-  days: number;
-  revenue: number;
-  average: number;
 };
 
 export type ViewerReactionKey = 'watch' | 'favorite' | 'cheer';
@@ -348,30 +336,6 @@ export async function getDashboardData() {
     revenueMap.set(record.record_date, current + Number(record.amount));
   });
 
-  const startDate = new Date(`${settings.start_date}T00:00:00+08:00`);
-  const growthMap: GrowthDay[] = Array.from({ length: settings.total_days }).map((_, index) => {
-    const day = index + 1;
-    const dateKey = formatDate(addDays(startDate, index));
-    const amount = revenueMap.get(dateKey) ?? 0;
-    const status = day > currentDay ? 'future' : day === currentDay ? 'today' : amount > 0 ? 'profit' : amount < 0 ? 'loss' : 'flat';
-
-    return { day, status };
-  });
-
-  const stageReports: StageReport[] = [7, 30, 100].map((days) => {
-    const start = formatDate(subDays(today, days - 1));
-    const revenue = incomeRecords
-      .filter((item) => item.record_date >= start && item.record_date <= todayString)
-      .reduce((sum, item) => sum + Number(item.amount), 0);
-
-    return {
-      label: `${days}天复盘`,
-      days,
-      revenue,
-      average: revenue / days,
-    };
-  });
-
   const recentRevenue = Array.from({ length: 14 }).map((_, index) => {
     const date = subDays(today, 13 - index);
     const key = formatDate(date);
@@ -438,9 +402,6 @@ export async function getDashboardData() {
     },
     recentRevenue,
     projectTotals,
-    growthMap,
-    stageReports,
-    ledgerRecords: incomeRecords.slice(0, 6),
   };
 }
 

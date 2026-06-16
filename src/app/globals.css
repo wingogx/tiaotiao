@@ -207,10 +207,6 @@ main {
   color: var(--neko-brown);
 }
 
-.grid-cols-20 {
-  grid-template-columns: repeat(20, minmax(0, 1fr));
-}
-
 .mobile-app-shell {
   background:
     radial-gradient(circle at 50% -10%, rgba(255, 221, 188, 0.9), transparent 36%),

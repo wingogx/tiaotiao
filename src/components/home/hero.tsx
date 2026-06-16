@@ -1,14 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { BookOpen, Clock3, Compass, HeartHandshake, Map, Mic, PawPrint, Plus, Send, Settings, Sparkles, Target, UserRound, Zap } from 'lucide-react';
+import { BookOpen, Clock3, Compass, HeartHandshake, PawPrint, Plus, Settings, Target, UserRound, Zap } from 'lucide-react';
 
 import { addViewerReaction, incrementHomeVital } from '@/app/actions';
 import { HomeVisitPill } from '@/components/home/home-visit-pill';
-import { RiskNotice } from '@/components/common/risk-notice';
-import { getIncomeTypeLabel } from '@/lib/data/queries';
 import { normalizeHomeMood } from '@/lib/home/state';
-import { clampPercent, formatCompactCurrency, formatCurrency, formatDate } from '@/lib/utils/format';
+import { clampPercent, formatCompactCurrency, formatCurrency } from '@/lib/utils/format';
 import type { AwaitedReturn } from '@/types/common';
 
 type DashboardData = AwaitedReturn<typeof import('@/lib/data/queries').getDashboardData>;
@@ -160,39 +158,6 @@ export function Hero({ data }: { data: DashboardData }) {
           </aside>
         </div>
 
-        <div className="relative z-20 mx-auto grid max-w-[1120px] gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-          <ShareReportCard
-            currentDay={summary.currentDay}
-            mood={mood}
-            todayRevenue={summary.todayRevenue}
-            totalRevenue={summary.totalRevenue}
-            headline={heroHeadline}
-          />
-          <GrowthMap days={data.growthMap} currentDay={summary.currentDay} />
-        </div>
-
-        <div className="relative z-20 mx-auto mt-5 grid max-w-[1120px] gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-          <StageReports reports={data.stageReports} />
-          <TrustLedger records={data.ledgerRecords} />
-        </div>
-
-        <div className="relative z-20 mx-auto mt-5 max-w-[1120px]">
-          <RiskNotice />
-        </div>
-
-        <div className="relative z-20 mx-auto mt-1 max-w-[980px]">
-          <div className="rounded-[34px] border border-[var(--neko-line)] bg-white/78 p-3 shadow-[0_18px_46px_rgba(93,65,57,0.11)] backdrop-blur-xl">
-            <div className="flex items-center gap-3 rounded-full bg-white/86 px-4 py-3">
-              <span className="rounded-full bg-[#f7dfe4] px-3 py-2 text-sm font-black text-[var(--neko-red)]">跟 Lumia</span>
-              <span className="min-w-0 flex-1 truncate text-sm text-[var(--neko-muted)]">{viewer ? `${viewerName}，今天想先说哪件事？` : '说点什么，把今天的状态留下来...'}</span>
-              <Mic size={18} className="hidden text-[var(--neko-muted)] sm:block" />
-              <Link href="/app/today?tab=tasks" className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--neko-red)] text-white shadow-[0_12px_26px_rgba(201,101,113,0.24)] transition hover:-translate-y-0.5 hover:bg-[#b95766]">
-                <Send size={16} />
-              </Link>
-            </div>
-          </div>
-        </div>
-
         <div className="relative z-20 mx-auto mt-5 max-w-[1088px]">
           <nav className="neko-dock">
             <DockItem href="/" icon={<PawPrint size={31} />} label="首页" active />
@@ -236,148 +201,6 @@ function WatchSeat({ stats }: { stats: DashboardData['homeStatus']['reactionStat
         ))}
       </div>
     </div>
-  );
-}
-
-function ShareReportCard({
-  currentDay,
-  headline,
-  mood,
-  todayRevenue,
-  totalRevenue,
-}: {
-  currentDay: number;
-  headline: string;
-  mood: string;
-  todayRevenue: number;
-  totalRevenue: number;
-}) {
-  return (
-    <section className="neko-panel">
-      <div className="mb-5 flex items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-sm font-black text-[var(--neko-red)]">
-            <Sparkles size={18} />
-            每日战报卡
-          </div>
-          <h2 className="mt-2 text-2xl font-black text-[var(--neko-ink)]">Day {currentDay} 的公开围观版</h2>
-        </div>
-        <span className="rounded-full bg-[#fff0de] px-3 py-1 text-xs font-black text-[#e28e32]">可截图分享</span>
-      </div>
-      <div className="rounded-[28px] border border-[var(--neko-line)] bg-[linear-gradient(135deg,#fffaf6,#f8dfe5)] p-5">
-        <div className="text-xs font-bold text-[var(--neko-muted)]">1000天真实盈利养成记录</div>
-        <div className="mt-3 text-3xl font-black leading-tight text-[var(--neko-ink)]">{headline}，继续记录真实的一天</div>
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <ReportMetric label="今日收入" value={formatCurrency(todayRevenue)} />
-          <ReportMetric label="累计收入" value={formatCurrency(totalRevenue)} />
-          <ReportMetric label="精神状态" value={mood} />
-          <ReportMetric label="陪伴角色" value="Lumia" />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ReportMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[20px] border border-white/70 bg-white/62 px-4 py-3">
-      <div className="text-xs text-[var(--neko-muted)]">{label}</div>
-      <div className="mt-1 truncate text-base font-black text-[var(--neko-ink)]">{value}</div>
-    </div>
-  );
-}
-
-function GrowthMap({ currentDay, days }: { currentDay: number; days: DashboardData['growthMap'] }) {
-  return (
-    <section className="neko-panel">
-      <div className="mb-5 flex items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-sm font-black text-[var(--neko-red)]">
-            <Map size={18} />
-            1000天成长地图
-          </div>
-          <h2 className="mt-2 text-2xl font-black text-[var(--neko-ink)]">已经走到 Day {currentDay}</h2>
-        </div>
-        <span className="rounded-full bg-[#eef8f2] px-3 py-1 text-xs font-black text-[#2e815e]">完整 1000 天</span>
-      </div>
-      <div className="grid grid-cols-20 gap-1.5">
-        {days.map((day) => (
-          <span key={day.day} title={`Day ${day.day}`} className={`aspect-square rounded-[7px] ${growthDayClass(day.status)}`} />
-        ))}
-      </div>
-      <div className="mt-5 flex flex-wrap gap-3 text-xs font-bold text-[var(--neko-muted)]">
-        <Legend dot="bg-[#4abc91]" label="盈利" />
-        <Legend dot="bg-[var(--neko-red)]" label="今日" />
-        <Legend dot="bg-[#df6f78]" label="回撤" />
-        <Legend dot="bg-[#e9ddd6]" label="待记录" />
-      </div>
-    </section>
-  );
-}
-
-function growthDayClass(status: DashboardData['growthMap'][number]['status']) {
-  const classes = {
-    future: 'bg-[#e9ddd6]',
-    profit: 'bg-[#4abc91]',
-    loss: 'bg-[#df6f78]',
-    flat: 'bg-[#f2d6b1]',
-    today: 'bg-[var(--neko-red)] ring-2 ring-white',
-  };
-
-  return classes[status];
-}
-
-function Legend({ dot, label }: { dot: string; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-2">
-      <span className={`h-3 w-3 rounded-full ${dot}`} />
-      {label}
-    </span>
-  );
-}
-
-function StageReports({ reports }: { reports: DashboardData['stageReports'] }) {
-  return (
-    <section className="neko-panel">
-      <div className="mb-5 text-sm font-black text-[var(--neko-red)]">阶段复盘报告</div>
-      <div className="grid gap-3">
-        {reports.map((report) => (
-          <div key={report.days} className="rounded-[22px] border border-[var(--neko-line)] bg-white/62 px-4 py-4">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <div className="text-base font-black text-[var(--neko-ink)]">{report.label}</div>
-                <div className="mt-1 text-xs text-[var(--neko-muted)]">日均 {formatCurrency(report.average)}</div>
-              </div>
-              <div className="text-right text-sm font-black text-[var(--neko-red)]">{formatCurrency(report.revenue)}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function TrustLedger({ records }: { records: DashboardData['ledgerRecords'] }) {
-  return (
-    <section className="neko-panel">
-      <div className="mb-5 text-sm font-black text-[var(--neko-red)]">可信账本</div>
-      <div className="space-y-3">
-        {records.length === 0 ? (
-          <div className="rounded-[22px] border border-dashed border-[var(--neko-line)] bg-white/50 px-4 py-5 text-sm text-[var(--neko-muted)]">还没有收入记录。</div>
-        ) : (
-          records.map((record) => (
-            <div key={record.id} className="grid gap-3 rounded-[22px] border border-[var(--neko-line)] bg-white/62 px-4 py-3 sm:grid-cols-[88px_1fr_auto] sm:items-center">
-              <span className="rounded-full bg-[#fff0de] px-3 py-1 text-center text-xs font-bold text-[#e28e32]">{formatDate(record.record_date)}</span>
-              <div className="min-w-0">
-                <div className="truncate text-sm font-black text-[var(--neko-ink)]">{record.projects?.name ?? '未命名项目'}</div>
-                <div className="mt-1 text-xs text-[var(--neko-muted)]">{getIncomeTypeLabel(record.income_type)} · {record.note || '当日记录'}</div>
-              </div>
-              <strong className={Number(record.amount) >= 0 ? 'text-[var(--neko-red)]' : 'text-[var(--danger)]'}>{formatCurrency(Number(record.amount))}</strong>
-            </div>
-          ))
-        )}
-      </div>
-    </section>
   );
 }
 
