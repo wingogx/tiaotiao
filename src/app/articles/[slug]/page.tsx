@@ -1,9 +1,10 @@
 import { notFound } from 'next/navigation';
 
 import { PostDetail } from '@/components/articles/post-detail';
+import { PostComments } from '@/components/articles/post-comments';
 import { MobileAppShell } from '@/components/mobile/mobile-app-shell';
 import { getViewerAccess } from '@/lib/auth/session';
-import { getPostBySlug } from '@/lib/data/queries';
+import { getPostBySlug, getPostComments } from '@/lib/data/queries';
 
 export default async function ArticleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -13,11 +14,16 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
     notFound();
   }
 
+  const comments = await getPostComments(post.id);
   const accountLabel = viewer.profile?.display_name ?? viewer.profile?.email ?? '我';
+  const canComment = viewer.canViewArticles || viewer.isAdmin;
 
   return (
     <MobileAppShell accountLabel={accountLabel}>
-      <PostDetail post={post} canViewContent={viewer.canViewArticles} shell={false} />
+      <div className="space-y-5">
+        <PostDetail post={post} canViewContent={viewer.canViewArticles || viewer.isAdmin} shell={false} />
+        <PostComments comments={comments} canComment={canComment} isAdmin={viewer.isAdmin} postId={post.id} slug={slug} />
+      </div>
     </MobileAppShell>
   );
 }

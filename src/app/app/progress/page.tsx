@@ -21,14 +21,14 @@ export default async function ProgressPage() {
 
   return (
     <div className="space-y-5">
-      <SectionHeader title="挑战进度" description="聚合长期挑战的核心指标，像游戏进度一样持续显示真实状态。" />
+      <SectionHeader title="养成进度" description="聚合长期记录的核心指标，像游戏进度一样持续显示真实状态。" />
 
       <section className="legacy-gradient rounded-[32px] p-7 text-white shadow-[0_24px_70px_rgba(201,101,113,0.2)]">
         <div className="grid gap-6 md:grid-cols-[1fr_1fr]">
           <div>
-            <div className="text-xs uppercase tracking-[0.18em] text-white/64">Long Challenge</div>
+            <div className="text-xs uppercase tracking-[0.18em] text-white/64">Long Record</div>
             <h2 className="mt-3 text-4xl font-black">第 {data.currentDay} 天，还剩 {data.remainingDays} 天</h2>
-            <p className="mt-3 text-sm leading-7 text-white/72">这里不是装饰数字，而是暴露真实挑战进度：收入差额、时间压力、任务执行率。</p>
+            <p className="mt-3 text-sm leading-7 text-white/72">这里不是装饰数字，而是展示真实养成进度：收入差额、时间压力、任务执行率。</p>
           </div>
           <div className="space-y-4">
             <ProgressLine label="收入进度" value={formatPercent(data.incomeProgress)} percent={data.incomeProgress} />

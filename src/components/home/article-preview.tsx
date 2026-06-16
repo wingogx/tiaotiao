@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { BookOpen, ChevronRight, Orbit, Sparkles } from 'lucide-react';
 
 import type { AwaitedReturn } from '@/types/common';
+import { getPostTypeLabel } from '@/lib/data/queries';
 import { formatDate } from '@/lib/utils/format';
 
 type DashboardData = AwaitedReturn<typeof import('@/lib/data/queries').getDashboardData>;
@@ -16,7 +17,7 @@ export function ArticlePreview({ data }: { data: DashboardData }) {
         <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="neko-chip text-xs font-bold uppercase tracking-[0.16em]">
-              <Orbit size={17} /> Daily Review
+              <Orbit size={17} /> 复盘日记
             </div>
             <h2 className="mt-4 text-3xl font-black text-[var(--neko-ink)]">每日复盘：最近 5 篇公开标题</h2>
           </div>
@@ -36,7 +37,7 @@ export function ArticlePreview({ data }: { data: DashboardData }) {
                 <div className="absolute right-8 top-8 flex h-20 w-20 items-center justify-center rounded-full bg-white/56 text-[var(--neko-red)]">
                   <Sparkles size={34} />
                 </div>
-                <div className="neko-chip w-fit text-xs font-bold uppercase tracking-[0.14em]">最新复盘</div>
+                <div className="neko-chip w-fit text-xs font-bold">{getPostTypeLabel(featured.post_type)}</div>
                 <h3 className="mt-8 max-w-[420px] text-4xl font-black leading-tight text-[var(--neko-ink)]">{featured.title}</h3>
                 <p className="mt-5 max-w-[420px] text-base leading-8 text-[var(--neko-brown)]">{featured.excerpt}</p>
                 <div className="absolute bottom-7 left-7 flex items-center gap-3 text-sm font-bold text-[var(--neko-red)]">
@@ -46,10 +47,10 @@ export function ArticlePreview({ data }: { data: DashboardData }) {
             ) : null}
 
             <div className="grid gap-4 sm:grid-cols-2">
-              {rest.map((post, index) => (
+              {rest.map((post) => (
                 <Link key={post.id} href={`/articles/${post.slug}`} className="group rounded-[26px] border border-[var(--neko-line)] bg-white/56 p-5 transition hover:-translate-y-1 hover:bg-white">
                   <div className="mb-5 flex items-center justify-between text-xs font-bold uppercase tracking-[0.14em] text-[var(--neko-muted)]">
-                    <span>Review {String(index + 2).padStart(2, '0')}</span>
+                    <span>{getPostTypeLabel(post.post_type)}</span>
                     <span>{formatDate(post.post_date)}</span>
                   </div>
                   <div className="text-xl font-black leading-8 text-[var(--neko-ink)]">{post.title}</div>

@@ -47,7 +47,7 @@ export function RegisterForm({ error, success = false, email }: RegisterFormProp
 
   if (success) {
     return (
-      <AuthShell title="注册成功" description="账号已经创建完成，返回登录页即可使用邮箱和密码登录。" brand="TIAOTIAO">
+      <AuthShell title="注册成功" description="账号已经创建完成，返回登录页即可使用邮箱和密码登录。" brand="LUMIA 记录室">
         <div className="mt-7 rounded-[26px] border border-[#9fcbb7] bg-[#eef8f2] px-5 py-6 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#9fcbb7] bg-white/84 shadow-sm">
             <CheckCircle2 className="h-8 w-8 text-[#42b485]" />
@@ -92,7 +92,7 @@ export function RegisterForm({ error, success = false, email }: RegisterFormProp
   }
 
   return (
-    <AuthShell title="欢迎加入" description="使用邮箱创建账号，开启今天的挑战记录与复盘旅程。" brand="TIAOTIAO">
+    <AuthShell title="欢迎加入" description="使用邮箱创建账号，围观 1000 天真实盈利养成记录。" brand="LUMIA 记录室">
       <div className="mt-9 grid grid-cols-3 gap-1 rounded-[22px] border border-[var(--neko-line)] bg-[#f4ece7] p-1">
         <Link
           className="flex h-11 items-center justify-center gap-2 rounded-[18px] text-sm font-black text-[var(--neko-brown)] transition hover:bg-white/70"
@@ -190,7 +190,14 @@ export function RegisterForm({ error, success = false, email }: RegisterFormProp
             onChange={(event) => setAgreed(event.target.checked)}
             className="mt-1"
           />
-          <span>我理解账号注册后需要管理员开通权限，未授权前只能查看公开内容。</span>
+          <span>
+            我已阅读并理解
+            <Link className="mx-1 font-bold text-[var(--neko-red)]" href="/terms">用户协议</Link>
+            <Link className="mr-1 font-bold text-[var(--neko-red)]" href="/privacy">隐私政策</Link>
+            和
+            <Link className="ml-1 font-bold text-[var(--neko-red)]" href="/risk">风险提示</Link>
+            ，未授权前只能查看公开内容。
+          </span>
         </label>
 
         <Button

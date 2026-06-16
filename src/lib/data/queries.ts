@@ -1,4 +1,4 @@
-import { subDays } from 'date-fns';
+import { addDays, subDays } from 'date-fns';
 
 import { getCurrentSessionUser } from '@/lib/auth/session';
 import { emptyUserHomeVitals, parseSiteHomeState, parseUserHomeVitals } from '@/lib/home/state';
@@ -27,6 +27,7 @@ export type IncomeRecord = {
   id: string;
   project_id: string;
   amount: number;
+  income_type: IncomeType;
   note: string | null;
   record_date: string;
   created_at: string;
@@ -62,12 +63,82 @@ export type DailyPost = {
   id: string;
   title: string;
   slug: string;
+  post_type: PostType;
   cover_url: string | null;
   excerpt: string;
   content_md: string;
   post_date: string;
   created_at: string;
 };
+
+export type IncomeType = 'content' | 'product' | 'securities' | 'other';
+
+export type PostType = 'business_review' | 'product_review' | 'content_review' | 'life_insight' | 'daily_note';
+
+export type PostComment = {
+  id: string;
+  post_id: string;
+  body: string;
+  created_at: string;
+  profiles?: Pick<ProfileSummary, 'display_name' | 'email'> | null;
+};
+
+export type GrowthDay = {
+  day: number;
+  status: 'future' | 'profit' | 'loss' | 'flat' | 'today';
+};
+
+export type StageReport = {
+  label: string;
+  days: number;
+  revenue: number;
+  average: number;
+};
+
+export type ViewerReactionKey = 'watch' | 'favorite' | 'cheer';
+
+export type ViewerReactionStats = Record<ViewerReactionKey, number> & {
+  total: number;
+};
+
+type ProfileSummary = {
+  display_name: string | null;
+  email: string;
+};
+
+export const incomeTypeValues = ['content', 'product', 'securities', 'other'] as const;
+export const postTypeValues = ['business_review', 'product_review', 'content_review', 'life_insight', 'daily_note'] as const;
+
+export const incomeTypeOptions = [
+  { value: 'content', label: '内容收入' },
+  { value: 'product', label: '产品收入' },
+  { value: 'securities', label: '证券投资' },
+  { value: 'other', label: '其他收入' },
+] as const satisfies Array<{ value: (typeof incomeTypeValues)[number]; label: string }>;
+
+export const postTypeOptions = [
+  { value: 'business_review', label: '经营复盘' },
+  { value: 'product_review', label: '产品复盘' },
+  { value: 'content_review', label: '内容复盘' },
+  { value: 'life_insight', label: '人生领悟' },
+  { value: 'daily_note', label: '日常记录' },
+] as const satisfies Array<{ value: (typeof postTypeValues)[number]; label: string }>;
+
+export function normalizeIncomeType(value: string | null | undefined): IncomeType {
+  return incomeTypeOptions.find((item) => item.value === value)?.value ?? 'content';
+}
+
+export function normalizePostType(value: string | null | undefined): PostType {
+  return postTypeOptions.find((item) => item.value === value)?.value ?? 'business_review';
+}
+
+export function getIncomeTypeLabel(value: string | null | undefined) {
+  return incomeTypeOptions.find((item) => item.value === value)?.label ?? '内容收入';
+}
+
+export function getPostTypeLabel(value: string | null | undefined) {
+  return postTypeOptions.find((item) => item.value === value)?.label ?? '经营复盘';
+}
 
 function getTodayString() {
   return getShanghaiDateString();
@@ -108,7 +179,7 @@ export async function getIncomeRecords() {
   const service = createServiceRoleClient();
   const { data, error } = await service
     .from('income_records')
-    .select('id, project_id, amount, note, record_date, created_at, projects(name)')
+    .select('id, project_id, amount, income_type, note, record_date, created_at, projects(name)')
     .order('created_at', { ascending: false })
     .returns<IncomeRecord[]>();
 
@@ -157,7 +228,7 @@ export async function getPosts(limit?: number) {
   const service = createServiceRoleClient();
   let query = service
     .from('daily_posts')
-    .select('id, title, slug, cover_url, excerpt, content_md, post_date, created_at')
+    .select('id, title, slug, post_type, cover_url, excerpt, content_md, post_date, created_at')
     .eq('is_published', true)
     .order('post_date', { ascending: false })
     .order('created_at', { ascending: false });
@@ -179,7 +250,7 @@ export async function getPostBySlug(slug: string) {
   const service = createServiceRoleClient();
   const { data, error } = await service
     .from('daily_posts')
-    .select('id, title, slug, cover_url, excerpt, content_md, post_date, created_at')
+    .select('id, title, slug, post_type, cover_url, excerpt, content_md, post_date, created_at')
     .eq('slug', slug)
     .single<DailyPost>();
 
@@ -188,6 +259,49 @@ export async function getPostBySlug(slug: string) {
   }
 
   return data;
+}
+
+export async function getPostComments(postId: string) {
+  const service = createServiceRoleClient();
+  const { data, error } = await service
+    .from('post_comments')
+    .select('id, post_id, body, created_at, profiles(display_name, email)')
+    .eq('post_id', postId)
+    .eq('is_hidden', false)
+    .order('created_at', { ascending: false })
+    .returns<PostComment[]>();
+
+  if (error) {
+    throw new Error(`Failed to load post comments: ${error.message}`);
+  }
+
+  return data ?? [];
+}
+
+export async function getViewerReactionCount(reactionKey = 'watch') {
+  const service = createServiceRoleClient();
+  const { count, error } = await service.from('viewer_reactions').select('id', { count: 'exact', head: true }).eq('reaction_key', reactionKey);
+
+  if (error) {
+    throw new Error(`Failed to load viewer reaction count: ${error.message}`);
+  }
+
+  return count ?? 0;
+}
+
+export async function getViewerReactionStats(): Promise<ViewerReactionStats> {
+  const [watch, favorite, cheer] = await Promise.all([
+    getViewerReactionCount('watch'),
+    getViewerReactionCount('favorite'),
+    getViewerReactionCount('cheer'),
+  ]);
+
+  return {
+    watch,
+    favorite,
+    cheer,
+    total: watch + favorite + cheer,
+  };
 }
 
 export async function getProfiles() {
@@ -205,13 +319,14 @@ export async function getProfiles() {
 }
 
 export async function getDashboardData() {
-  const [settings, projects, incomeRecords, posts, currentUser, visitCount] = await Promise.all([
+  const [settings, projects, incomeRecords, posts, currentUser, visitCount, reactionStats] = await Promise.all([
     getSiteSettings(),
     getProjects(),
     getIncomeRecords(),
     getPosts(5),
     getCurrentSessionUser(),
     getHomeVisitCount(),
+    getViewerReactionStats(),
   ]);
 
   const today = new Date();
@@ -231,6 +346,30 @@ export async function getDashboardData() {
   incomeRecords.forEach((record) => {
     const current = revenueMap.get(record.record_date) ?? 0;
     revenueMap.set(record.record_date, current + Number(record.amount));
+  });
+
+  const startDate = new Date(`${settings.start_date}T00:00:00+08:00`);
+  const growthMap: GrowthDay[] = Array.from({ length: settings.total_days }).map((_, index) => {
+    const day = index + 1;
+    const dateKey = formatDate(addDays(startDate, index));
+    const amount = revenueMap.get(dateKey) ?? 0;
+    const status = day > currentDay ? 'future' : day === currentDay ? 'today' : amount > 0 ? 'profit' : amount < 0 ? 'loss' : 'flat';
+
+    return { day, status };
+  });
+
+  const stageReports: StageReport[] = [7, 30, 100].map((days) => {
+    const start = formatDate(subDays(today, days - 1));
+    const revenue = incomeRecords
+      .filter((item) => item.record_date >= start && item.record_date <= todayString)
+      .reduce((sum, item) => sum + Number(item.amount), 0);
+
+    return {
+      label: `${days}天复盘`,
+      days,
+      revenue,
+      average: revenue / days,
+    };
   });
 
   const recentRevenue = Array.from({ length: 14 }).map((_, index) => {
@@ -283,6 +422,8 @@ export async function getDashboardData() {
       tagline: homeState.tagline,
       todayString,
       visitCount,
+      reactionCount: reactionStats.total,
+      reactionStats,
     },
     viewer,
     viewerVitals,
@@ -297,6 +438,9 @@ export async function getDashboardData() {
     },
     recentRevenue,
     projectTotals,
+    growthMap,
+    stageReports,
+    ledgerRecords: incomeRecords.slice(0, 6),
   };
 }
 
@@ -389,11 +533,13 @@ export function buildPostPayload({
   coverUrl,
   content,
   excerpt,
+  postType,
 }: {
   title: string;
   coverUrl?: string;
   content: string;
   excerpt?: string;
+  postType?: string;
 }) {
   const slugBase = slugify(title);
   const slug = `${getShanghaiDateString()}-${slugBase}`;
@@ -401,6 +547,7 @@ export function buildPostPayload({
   return {
     title,
     slug,
+    post_type: normalizePostType(postType),
     cover_url: coverUrl?.trim() || null,
     excerpt: excerpt?.trim() || excerptFromMarkdown(content),
     content_md: content,

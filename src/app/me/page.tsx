@@ -27,7 +27,7 @@ export default async function MePage() {
                 {accountLabel.slice(0, 1).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1 md:mt-4 md:text-center">
-                <div className="truncate text-2xl font-black text-[var(--neko-ink)]">{viewer.profile?.display_name ?? '挑战观察员'}</div>
+                <div className="truncate text-2xl font-black text-[var(--neko-ink)]">{viewer.profile?.display_name ?? '记录观察员'}</div>
                 <div className="mt-1 truncate text-sm text-[var(--neko-muted)]">{viewer.profile?.email ?? '登录后同步账号与会员权限'}</div>
                 <div className="mt-3 inline-flex rounded-full border border-[var(--neko-line)] bg-white/72 px-3 py-1 text-xs font-bold text-[var(--neko-red)]">
                   {roleLabel}
@@ -36,7 +36,7 @@ export default async function MePage() {
             </div>
 
             <div className="mt-5 grid grid-cols-2 gap-3">
-              <AssetChip icon={<Target size={19} />} label="挑战天数" value={`第 ${data.summary.currentDay} 天`} />
+              <AssetChip icon={<Target size={19} />} label="记录天数" value={`第 ${data.summary.currentDay} 天`} />
               <AssetChip icon={<Coins size={19} />} label="累计收入" value={formatCurrency(data.summary.totalRevenue)} />
               <AssetChip icon={<Compass size={19} />} label="进行项目" value={`${activeProjects} 个`} />
               <AssetChip icon={<BookOpen size={19} />} label="复盘文章" value={`${data.posts.length} 篇`} />
@@ -65,7 +65,7 @@ export default async function MePage() {
               <div className="absolute bottom-5 right-5 w-[190px] rounded-[26px] border border-[var(--neko-line)] bg-white/78 p-4 shadow-[0_14px_34px_rgba(93,65,57,0.12)] backdrop-blur-xl md:w-[220px]">
                 <div className="text-2xl font-black text-[var(--neko-ink)]">Lumia</div>
                 <div className="mt-2 inline-flex rounded-full bg-[#f7dfe4] px-3 py-1 text-xs font-bold text-[var(--neko-red)]">当前同伴</div>
-                <div className="mt-4 text-xs leading-6 text-[var(--neko-muted)]">把收入、任务、复盘转成挑战进度。</div>
+                <div className="mt-4 text-xs leading-6 text-[var(--neko-muted)]">把收入、任务、复盘转成养成进度。</div>
                 <ProgressLine label="目标进度" value={data.summary.incomeProgress} />
                 <Link href="/app/today" className="mt-4 flex h-11 items-center justify-center rounded-full bg-[var(--neko-red)] text-sm font-black text-white shadow-[0_12px_24px_rgba(201,101,113,0.24)]">
                   今日录入

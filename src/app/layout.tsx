@@ -15,8 +15,8 @@ const headingFont = Noto_Serif_SC({
 });
 
 export const metadata: Metadata = {
-  title: "1000天赚1000万 实盘跟踪日记",
-  description: "公开记录一个人一千天赚到一千万的真实过程。",
+  title: "1000天真实盈利养成记录",
+  description: "公开记录一个人一千天多元收入、复盘日记和人生领悟的真实过程。",
 };
 
 export default function RootLayout({

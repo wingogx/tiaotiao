@@ -8,8 +8,8 @@ export default async function AppArticlesPage() {
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="复盘记忆"
-        description="查看已发布的复盘记忆卡。公开区展示标题和摘要，完整正文按权限开放。"
+        title="复盘日记"
+        description="查看已发布的复盘日记。公开区展示标题和摘要，完整过程按权限开放。"
       />
       <AdminPostList posts={posts} />
     </div>

@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import type { DailyPost } from '@/lib/data/queries';
+import { getPostTypeLabel } from '@/lib/data/queries';
 import { formatDate } from '@/lib/utils/format';
 
 import { EmptyState } from '@/components/app/admin-ui';
@@ -29,12 +30,15 @@ export function PostList({ posts, basePath = '/articles' }: { posts: DailyPost[]
 
             <div className="flex flex-col justify-between gap-4 py-1">
               <div>
-                <div className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--neko-muted)]">{formatDate(post.post_date)}</div>
+                <div className="flex flex-wrap gap-2 text-xs font-bold">
+                  <span className="rounded-full bg-[#fff0de] px-3 py-1 text-[#e28e32]">{formatDate(post.post_date)}</span>
+                  <span className="rounded-full bg-[#f7dfe4] px-3 py-1 text-[var(--neko-red)]">{getPostTypeLabel(post.post_type)}</span>
+                </div>
                 <h2 className="mt-3 text-2xl font-black leading-tight text-[var(--neko-ink)]">{post.title}</h2>
                 <p className="mt-4 text-sm leading-8 text-[var(--neko-muted)]">{post.excerpt}</p>
               </div>
 
-              <div className="text-sm font-black text-[var(--neko-red)]">打开记忆卡</div>
+              <div className="text-sm font-black text-[var(--neko-red)]">打开复盘</div>
             </div>
           </Card>
         </Link>

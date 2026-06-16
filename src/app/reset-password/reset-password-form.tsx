@@ -174,10 +174,10 @@ export function ResetPasswordForm() {
         ? '新密码已经生效，系统即将带你返回登录页。'
         : status === 'error'
           ? error || '这个重置链接已经失效，请重新发起找回密码。'
-          : '输入一个新的登录密码，保存后即可用新密码重新进入挑战舱。';
+          : '输入一个新的登录密码，保存后即可用新密码回到记录室。';
 
   return (
-    <AuthShell title={title} description={description} brand="TIAOTIAO">
+    <AuthShell title={title} description={description} brand="LUMIA 记录室">
       <div className="mt-7 rounded-[26px] border border-[var(--neko-line)] bg-white/68 px-5 py-6 text-center">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[var(--neko-line)] bg-white/84 shadow-sm">
           {status === 'checking' ? (

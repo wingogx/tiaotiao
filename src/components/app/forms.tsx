@@ -1,6 +1,7 @@
 import { Brain, CheckCircle2, Circle, Coins, FileText, FolderKanban, Plus, Trash2, UserPlus } from 'lucide-react';
 
 import type { DailyTask, Project, TaskTemplate } from '@/lib/data/queries';
+import { incomeTypeOptions, postTypeOptions } from '@/lib/data/queries';
 import { homeMoodOptions } from '@/lib/home/state';
 
 import {
@@ -57,7 +58,7 @@ export function TodayMoodForm({ currentMood }: { currentMood: string }) {
 export function TodayIncomeForm({ projects }: { projects: Project[] }) {
   return (
     <AdminPanel>
-      <PanelHeading icon={<Coins size={19} />} title="收入投喂" description="给今天的挑战增加经验值；退款或回撤可以填负数。" />
+      <PanelHeading icon={<Coins size={19} />} title="收入投喂" description="给今天的记录增加经验值；退款或回撤可以填负数。" />
       <form action={createIncomeRecord} className="space-y-4">
         <Field label="归属项目">
           <select name="projectId" className={selectClassName} required>
@@ -65,6 +66,15 @@ export function TodayIncomeForm({ projects }: { projects: Project[] }) {
             {projects.filter((item) => item.status === 'active').map((project) => (
               <option key={project.id} value={project.id}>
                 {project.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="收入类型">
+          <select name="incomeType" className={selectClassName} defaultValue="content" required>
+            {incomeTypeOptions.map((type) => (
+              <option key={type.value} value={type.value}>
+                {type.label}
               </option>
             ))}
           </select>
@@ -151,6 +161,15 @@ export function TodayPostForm() {
       <PanelHeading icon={<FileText size={19} />} title="复盘存档" description="把今天的判断、问题和收获存成一张公开摘要卡。" />
       <form action={createPost} className="space-y-4">
         <Field label="复盘标题"><Input name="title" placeholder="今天最重要的结论" required /></Field>
+        <Field label="内容类型">
+          <select name="postType" className={selectClassName} defaultValue="business_review" required>
+            {postTypeOptions.map((type) => (
+              <option key={type.value} value={type.value}>
+                {type.label}
+              </option>
+            ))}
+          </select>
+        </Field>
         <Field label="封面链接"><Input name="coverUrl" placeholder="可选，填写图片 URL" /></Field>
         <Field label="公开摘要" hint="不填则自动提取正文前几句"><Textarea name="excerpt" placeholder="给游客看的简短摘要" className="min-h-24" /></Field>
         <Field label="完整复盘"><Textarea name="content" placeholder="支持 Markdown，记录完整正文" className="min-h-72" required /></Field>
@@ -166,7 +185,7 @@ export function ProjectManagement({ projects, totals }: { projects: Project[]; t
       <AdminPanel>
         <PanelHeading icon={<FolderKanban size={19} />} title="解锁新收入地图" description="每个项目就是一个收益副本，后续收入都归属到这里。" />
         <form action={createProject} className="space-y-4">
-          <Field label="项目名称"><Input name="name" placeholder="例如小红书 / 视频号 / 股票" required /></Field>
+          <Field label="项目名称"><Input name="name" placeholder="例如小红书 / 视频号 / 产品销售" required /></Field>
           <Field label="项目备注"><Textarea name="notes" placeholder="定位、变现方式、当前推进重点" className="min-h-28" /></Field>
           <Button fullWidth className="h-12 rounded-[20px] font-black">创建项目地图</Button>
         </form>

@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation';
 
 import { PostDetail } from '@/components/articles/post-detail';
+import { PostComments } from '@/components/articles/post-comments';
 import { getViewerAccess } from '@/lib/auth/session';
-import { getPostBySlug } from '@/lib/data/queries';
+import { getPostBySlug, getPostComments } from '@/lib/data/queries';
 
 export default async function AppArticleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -12,5 +13,12 @@ export default async function AppArticleDetailPage({ params }: { params: Promise
     notFound();
   }
 
-  return <PostDetail post={post} canViewContent={viewer.canViewArticles} shell={false} />;
+  const comments = await getPostComments(post.id);
+
+  return (
+    <div className="space-y-5">
+      <PostDetail post={post} canViewContent={viewer.canViewArticles || viewer.isAdmin} shell={false} />
+      <PostComments comments={comments} canComment={viewer.canViewArticles || viewer.isAdmin} isAdmin={viewer.isAdmin} postId={post.id} slug={slug} />
+    </div>
+  );
 }

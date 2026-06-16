@@ -1,7 +1,7 @@
 import { TodayIncomeForm } from '@/components/app/forms';
 import { AdminPanel, EmptyState, PanelHeading } from '@/components/app/admin-ui';
 import { SectionHeader } from '@/components/app/section-header';
-import { getIncomeRecords, getProjects } from '@/lib/data/queries';
+import { getIncomeRecords, getProjects, getIncomeTypeLabel } from '@/lib/data/queries';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
 
 export default async function IncomePage() {
@@ -25,7 +25,7 @@ export default async function IncomePage() {
         <TodayIncomeForm projects={projects} />
 
         <AdminPanel>
-          <PanelHeading title="收益时间线" description="每一条记录都是挑战经验；负数会保留为真实回撤。" />
+          <PanelHeading title="收益时间线" description="每一条记录都是养成经验；负数会保留为真实回撤。" />
           <div className="space-y-3">
             {records.length === 0 ? (
               <EmptyState>还没有收入数据。</EmptyState>
@@ -35,7 +35,10 @@ export default async function IncomePage() {
                   <div className="rounded-full bg-[#fff0de] px-3 py-1 text-center text-xs font-bold text-[#e28e32]">{formatDate(record.record_date)}</div>
                   <div>
                     <div className="text-sm font-black text-[var(--neko-ink)]">{record.projects?.name ?? '未命名项目'}</div>
-                    <div className="mt-1 text-xs text-[var(--neko-muted)]">{record.note || '无备注'}</div>
+                    <div className="mt-1 flex flex-wrap gap-2 text-xs text-[var(--neko-muted)]">
+                      <span className="rounded-full bg-[#f7dfe4] px-2.5 py-1 font-bold text-[var(--neko-red)]">{getIncomeTypeLabel(record.income_type)}</span>
+                      <span className="leading-6">{record.note || '无备注'}</span>
+                    </div>
                   </div>
                   <div className={`text-right text-sm font-black ${Number(record.amount) >= 0 ? 'text-[var(--neko-red)]' : 'text-[var(--danger)]'}`}>
                     {formatCurrency(Number(record.amount))}

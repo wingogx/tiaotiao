@@ -13,7 +13,7 @@ type TodayTab = 'income' | 'review' | 'tasks';
 const todayTabs = [
   { id: 'tasks' as TodayTab, label: '任务打卡', hint: '执行力', icon: CheckCircle2 },
   { id: 'income' as TodayTab, label: '收入登记', hint: '经验值', icon: Coins },
-  { id: 'review' as TodayTab, label: '复盘文档', hint: '记忆卡', icon: FileText },
+  { id: 'review' as TodayTab, label: '复盘日记', hint: '完整过程', icon: FileText },
 ];
 
 export default async function TodayPage({ searchParams }: { searchParams: Promise<{ tab?: string | string[] }> }) {

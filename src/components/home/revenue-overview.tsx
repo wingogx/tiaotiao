@@ -17,7 +17,7 @@ export function RevenueOverview({ data }: { data: DashboardData }) {
             <div className="neko-chip text-xs font-bold uppercase tracking-[0.16em]">
               <HeartPulse size={17} /> Revenue Rhythm
             </div>
-            <h2 className="mt-4 text-3xl font-black text-[var(--neko-ink)]">收入曲线：过去 14 天实盘变化</h2>
+            <h2 className="mt-4 text-3xl font-black text-[var(--neko-ink)]">收入曲线：过去 14 天真实变化</h2>
           </div>
           <div className="text-sm text-[var(--neko-muted)]">每一笔收入都会进入 1000 万目标进度</div>
         </div>

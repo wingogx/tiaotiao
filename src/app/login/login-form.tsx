@@ -108,9 +108,9 @@ export function LoginForm() {
       description={
         mode === 'forgot'
           ? '输入注册邮箱后，系统会发送一个重置链接。链接打开后可直接设置新密码。'
-          : '选择您常用的登录方式，继续今天的挑战记录和复盘。'
+          : '选择你常用的登录方式，继续围观今天的真实盈利记录和复盘日记。'
       }
-      brand="TIAOTIAO"
+      brand="LUMIA 记录室"
     >
       <div className="mt-9 grid grid-cols-3 gap-1 rounded-[22px] border border-[var(--neko-line)] bg-[#f4ece7] p-1">
         <button

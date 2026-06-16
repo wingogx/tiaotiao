@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 import { requireAdmin, syncProfile } from '@/lib/auth/session';
 import { homeMoodOptions, homeVitalMetricKeys, incrementUserHomeVitals, parseSiteHomeState, serializeSiteHomeState } from '@/lib/home/state';
-import { buildPostPayload } from '@/lib/data/queries';
+import { buildPostPayload, incomeTypeValues, postTypeValues } from '@/lib/data/queries';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import { getShanghaiDateString } from '@/lib/utils/format';
@@ -18,6 +18,7 @@ const projectSchema = z.object({
 
 const incomeSchema = z.object({
   projectId: z.string().uuid('项目必填'),
+  incomeType: z.enum(incomeTypeValues),
   amount: z.coerce.number(),
   note: z.string().optional(),
 });
@@ -54,9 +55,25 @@ const tempTaskSchema = z.object({
 
 const postSchema = z.object({
   title: z.string().min(1, '标题不能为空'),
+  postType: z.enum(postTypeValues),
   coverUrl: z.string().url('封面需要是有效链接').optional().or(z.literal('')),
   excerpt: z.string().optional(),
   content: z.string().min(1, '正文不能为空'),
+});
+
+const commentSchema = z.object({
+  postId: z.string().uuid(),
+  slug: z.string().min(1),
+  body: z.string().trim().min(1, '留言不能为空').max(500, '留言最多 500 字'),
+});
+
+const reactionSchema = z.object({
+  reactionKey: z.enum(['watch', 'favorite', 'cheer']),
+});
+
+const commentIdSchema = z.object({
+  commentId: z.string().uuid(),
+  slug: z.string().min(1),
 });
 
 const userRoleSchema = z.object({
@@ -307,12 +324,14 @@ export async function createIncomeRecord(formData: FormData) {
   const service = createServiceRoleClient();
   const parsed = incomeSchema.parse({
     projectId: formData.get('projectId'),
+    incomeType: formData.get('incomeType'),
     amount: formData.get('amount'),
     note: formData.get('note'),
   });
 
   const { error } = await service.from('income_records').insert({
     project_id: parsed.projectId,
+    income_type: parsed.incomeType,
     amount: parsed.amount,
     note: parsed.note?.trim() || null,
     created_by: profile.id,
@@ -492,6 +511,7 @@ export async function createPost(formData: FormData) {
   const service = createServiceRoleClient();
   const parsed = postSchema.parse({
     title: formData.get('title'),
+    postType: formData.get('postType'),
     coverUrl: formData.get('coverUrl'),
     excerpt: formData.get('excerpt'),
     content: formData.get('content'),
@@ -511,6 +531,68 @@ export async function createPost(formData: FormData) {
   revalidatePath('/articles');
   revalidatePath(`/articles/${payload.slug}`);
   revalidatePath('/app/today');
+}
+
+export async function createPostComment(formData: FormData) {
+  const profile = await syncProfile();
+
+  if (!profile?.can_view_articles && profile?.role !== 'admin') {
+    redirect('/login?next=/articles');
+  }
+
+  const parsed = commentSchema.parse({
+    postId: formData.get('postId'),
+    slug: formData.get('slug'),
+    body: formData.get('body'),
+  });
+  const service = createServiceRoleClient();
+  const { error } = await service.from('post_comments').insert({
+    post_id: parsed.postId,
+    author_id: profile.id,
+    body: parsed.body,
+  });
+
+  if (error) {
+    throw new Error(`发布留言失败：${error.message}`);
+  }
+
+  revalidatePath(`/articles/${parsed.slug}`);
+  revalidatePath(`/app/articles/${parsed.slug}`);
+}
+
+export async function hidePostComment(formData: FormData) {
+  await requireAdmin();
+  const parsed = commentIdSchema.parse({
+    commentId: formData.get('commentId'),
+    slug: formData.get('slug'),
+  });
+  const service = createServiceRoleClient();
+  const { error } = await service.from('post_comments').update({ is_hidden: true }).eq('id', parsed.commentId);
+
+  if (error) {
+    throw new Error(`隐藏留言失败：${error.message}`);
+  }
+
+  revalidatePath(`/articles/${parsed.slug}`);
+  revalidatePath(`/app/articles/${parsed.slug}`);
+}
+
+export async function addViewerReaction(formData: FormData) {
+  const parsed = reactionSchema.parse({
+    reactionKey: formData.get('reactionKey') ?? 'watch',
+  });
+  const profile = await syncProfile();
+  const service = createServiceRoleClient();
+  const { error } = await service.from('viewer_reactions').insert({
+    reaction_key: parsed.reactionKey,
+    user_id: profile?.id ?? null,
+  });
+
+  if (error) {
+    throw new Error(`记录围观失败：${error.message}`);
+  }
+
+  revalidatePath('/');
 }
 
 export async function updateProfileRole(formData: FormData) {

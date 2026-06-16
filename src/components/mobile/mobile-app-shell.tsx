@@ -16,7 +16,7 @@ const tabs = [
   {
     href: '/',
     label: '首页',
-    eyebrow: '挑战舱',
+    eyebrow: '养成记录',
     icon: PawPrint,
     match: (pathname: string) => pathname === '/',
   },
@@ -36,15 +36,15 @@ const tabs = [
   },
   {
     href: '/articles',
-    label: '复盘',
-    eyebrow: '每日文章',
+    label: '日记',
+    eyebrow: '复盘日记',
     icon: BookOpen,
     match: (pathname: string) => pathname.startsWith('/articles') || pathname.startsWith('/app/articles'),
   },
   {
     href: '/app/today?tab=tasks',
     label: '录入',
-    eyebrow: '今日行动',
+    eyebrow: '今日进展',
     icon: Zap,
     match: (pathname: string) => pathname.startsWith('/app/today'),
   },

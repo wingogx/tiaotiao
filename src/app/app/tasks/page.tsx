@@ -7,7 +7,7 @@ export default async function TasksPage() {
 
   return (
     <div className="space-y-5">
-      <SectionHeader title="任务养成" description="把重复动作变成每日习惯卡，完成后直接增加挑战执行力。" />
+      <SectionHeader title="任务养成" description="把重复动作变成每日习惯卡，完成后直接增加长期执行力。" />
       <TaskTemplateManager projects={projects} templates={templates} />
       <TodayTaskList tasks={tasks} />
     </div>

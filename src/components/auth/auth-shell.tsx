@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { BarChart3, X } from 'lucide-react';
+import { HeartHandshake, X } from 'lucide-react';
 
 type AuthShellProps = {
   title: string;
@@ -9,7 +9,7 @@ type AuthShellProps = {
   brand?: string;
 };
 
-export function AuthShell({ title, description, children, brand = 'Tiaotiao' }: AuthShellProps) {
+export function AuthShell({ title, description, children, brand = 'LUMIA 记录室' }: AuthShellProps) {
   return (
     <div className="relative min-h-screen overflow-hidden px-4 py-8 text-[var(--neko-ink)]">
       <div className="pointer-events-none absolute inset-0">
@@ -29,7 +29,7 @@ export function AuthShell({ title, description, children, brand = 'Tiaotiao' }: 
 
         <div className="flex justify-center">
           <div className="legacy-gradient flex h-[104px] w-[104px] items-center justify-center rounded-full border border-white/40 text-white shadow-[0_22px_50px_rgba(201,101,113,0.28)]">
-            <BarChart3 className="h-11 w-11" />
+            <HeartHandshake className="h-11 w-11" />
           </div>
         </div>
 
