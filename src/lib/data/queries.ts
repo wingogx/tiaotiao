@@ -307,14 +307,13 @@ export async function getProfiles() {
 }
 
 export async function getDashboardData() {
-  const [settings, projects, incomeRecords, posts, currentUser, visitCount, reactionStats] = await Promise.all([
+  const [settings, projects, incomeRecords, posts, currentUser, visitCount] = await Promise.all([
     getSiteSettings(),
     getProjects(),
     getIncomeRecords(),
     getPosts(5),
     getCurrentSessionUser(),
     getHomeVisitCount(),
-    getViewerReactionStats(),
   ]);
 
   const today = new Date();
@@ -386,8 +385,6 @@ export async function getDashboardData() {
       tagline: homeState.tagline,
       todayString,
       visitCount,
-      reactionCount: reactionStats.total,
-      reactionStats,
     },
     viewer,
     viewerVitals,

@@ -1,9 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { BookOpen, Clock3, Compass, HeartHandshake, PawPrint, Plus, Settings, Target, UserRound, Zap } from 'lucide-react';
+import { BookOpen, Clock3, Compass, PawPrint, Plus, Settings, Target, UserRound, Zap } from 'lucide-react';
 
-import { addViewerReaction, incrementHomeVital } from '@/app/actions';
+import { incrementHomeVital } from '@/app/actions';
 import { HomeVisitPill } from '@/components/home/home-visit-pill';
 import { normalizeHomeMood } from '@/lib/home/state';
 import { clampPercent, formatCompactCurrency, formatCurrency } from '@/lib/utils/format';
@@ -151,9 +151,6 @@ export function Hero({ data }: { data: DashboardData }) {
                 <SummaryTag label="复盘日记" value={`${posts.length} 篇`} />
                 <SummaryTag label="进行项目" value={`${summary.activeProjects} 个`} />
               </div>
-              <div className="mt-5">
-                <WatchSeat stats={homeStatus.reactionStats} />
-              </div>
             </Panel>
           </aside>
         </div>
@@ -170,37 +167,6 @@ export function Hero({ data }: { data: DashboardData }) {
         </div>
       </div>
     </section>
-  );
-}
-
-function WatchSeat({ stats }: { stats: DashboardData['homeStatus']['reactionStats'] }) {
-  const items = [
-    { key: 'watch', label: '陪伴一下', value: stats.watch },
-    { key: 'favorite', label: '收藏追更', value: stats.favorite },
-    { key: 'cheer', label: '点赞记录', value: stats.cheer },
-  ] as const;
-
-  return (
-    <div className="rounded-[22px] border border-[var(--neko-line)] bg-white/58 p-3">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="flex items-center gap-2 text-sm font-black text-[var(--neko-ink)]">
-          <HeartHandshake size={18} className="text-[var(--neko-red)]" />
-          围观席
-        </span>
-        <span className="text-xs font-black text-[var(--neko-red)]">{stats.total} 次互动</span>
-      </div>
-      <div className="grid gap-2">
-        {items.map((item) => (
-          <form key={item.key} action={addViewerReaction}>
-            <input type="hidden" name="reactionKey" value={item.key} />
-            <button type="submit" className="flex w-full items-center justify-between rounded-[16px] bg-white/72 px-3 py-2 text-xs font-black text-[var(--neko-brown)] transition hover:bg-white">
-              <span>{item.label}</span>
-              <span className="text-[var(--neko-red)]">{item.value}</span>
-            </button>
-          </form>
-        ))}
-      </div>
-    </div>
   );
 }
 
