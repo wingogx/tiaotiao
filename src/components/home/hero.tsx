@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { BookOpen, Clock3, Compass, PawPrint, Plus, Settings, Target, UserRound, Zap } from 'lucide-react';
 
-import { incrementHomeVital } from '@/app/actions';
+import { addHomeMoodVote } from '@/app/actions';
 import { HomeVisitPill } from '@/components/home/home-visit-pill';
 import { normalizeHomeMood } from '@/lib/home/state';
 import { clampPercent, formatCompactCurrency, formatCurrency } from '@/lib/utils/format';
@@ -12,17 +12,18 @@ import type { AwaitedReturn } from '@/types/common';
 type DashboardData = AwaitedReturn<typeof import('@/lib/data/queries').getDashboardData>;
 
 const vitalItems = [
-  { key: 'share', label: '状态分享', hint: '说一句今天的心事', bar: 'bg-[#4abc91]' },
-  { key: 'food', label: '饮食', hint: '吃到一顿舒服的饭', bar: 'bg-[#f0a455]' },
-  { key: 'health', label: '健康', hint: '把自己照顾好一点', bar: 'bg-[#df6f78]' },
-  { key: 'energy', label: '活力', hint: '哪怕只推进一点点', bar: 'bg-[#f28d3a]' },
+  { key: '开心', label: '开心', hint: '今天有一点轻快', bar: 'bg-[#f0a455]' },
+  { key: '焦虑', label: '焦虑', hint: '有点紧绷也没关系', bar: 'bg-[#d88189]' },
+  { key: '痛苦', label: '痛苦', hint: '先陪自己撑过去', bar: 'bg-[#bf7f6c]' },
+  { key: '沮丧', label: '沮丧', hint: '慢一点也算前进', bar: 'bg-[#9f8dc9]' },
 ] as const;
 
 export function Hero({ data }: { data: DashboardData }) {
-  const { homeStatus, posts, settings, summary, viewer, viewerVitals } = data;
+  const { homeStatus, posts, settings, summary } = data;
   const remainingDays = Math.max(settings.total_days - summary.currentDay, 0);
   const mood = normalizeHomeMood(homeStatus.mood);
   const moodStyle = getMoodStyle(mood);
+  const moodVotes = homeStatus.moodVoteStats;
   const liveTime = new Intl.DateTimeFormat('zh-CN', {
     timeZone: 'Asia/Shanghai',
     hour: '2-digit',
@@ -43,8 +44,6 @@ export function Hero({ data }: { data: DashboardData }) {
     }).format(new Date()),
   );
   const heroHeadline = getHeroHeadline(hour);
-  const viewerName = viewer?.displayName ?? viewer?.email?.split('@')[0] ?? '你';
-  const todayCareTotal = (viewerVitals?.share ?? 0) + (viewerVitals?.food ?? 0) + (viewerVitals?.health ?? 0) + (viewerVitals?.energy ?? 0);
 
   return (
     <section className="neko-screen mx-auto mt-0 min-h-screen max-w-[1360px] overflow-hidden rounded-b-[28px] border border-[var(--neko-line)] bg-[var(--neko-bg)] shadow-[0_28px_90px_rgba(83,58,48,0.14)]">
@@ -91,11 +90,9 @@ export function Hero({ data }: { data: DashboardData }) {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-black text-[var(--neko-ink)]">今天的状态</h2>
-                  <p className="mt-1 text-sm text-[var(--neko-muted)]">
-                    {viewer ? `${viewerName} 可以直接点 + 记录今天。` : '登录后可以给今天的四项状态逐一加分。'}
-                  </p>
+                  <p className="mt-1 text-sm text-[var(--neko-muted)]">路过的朋友都可以点 +，一起决定今天的精神状态。</p>
                 </div>
-                <span className="rounded-full bg-[#fff3e4] px-3 py-2 text-xs font-black text-[#d98a2b]">{viewer ? '已登录' : '去登录'}</span>
+                <span className="rounded-full bg-[#fff3e4] px-3 py-2 text-xs font-black text-[#d98a2b]">今日票数</span>
               </div>
 
               <div className="mt-5 space-y-4">
@@ -103,11 +100,11 @@ export function Hero({ data }: { data: DashboardData }) {
                   <VitalMeterRow
                     key={item.key}
                     barClassName={item.bar}
-                    enabled={Boolean(viewer)}
                     hint={item.hint}
                     label={item.label}
-                    metric={item.key}
-                    value={viewerVitals?.[item.key] ?? 0}
+                    mood={item.key}
+                    totalVotes={moodVotes.total}
+                    value={moodVotes[item.key]}
                   />
                 ))}
               </div>
@@ -141,7 +138,7 @@ export function Hero({ data }: { data: DashboardData }) {
               <div className="mt-6 border-t border-[var(--neko-line)] pt-6">
                 <div className="mb-4 text-lg font-black text-[var(--neko-ink)]">关爱账本</div>
                 <div className="space-y-3">
-                  <SummaryRow label="今日互动" value={`${todayCareTotal} 次`} />
+                  <SummaryRow label="今日互动" value={`${moodVotes.total} 次`} />
                   <SummaryRow label="第几天" value={`Day ${summary.currentDay}`} />
                   <SummaryRow label="今日收入" value={formatCurrency(summary.todayRevenue)} />
                   <RemainingDaysRow remainingDays={remainingDays} totalDays={settings.total_days} />
@@ -200,54 +197,43 @@ function MoodChip({
 
 function VitalMeterRow({
   barClassName,
-  enabled,
   hint,
   label,
-  metric,
+  mood,
+  totalVotes,
   value,
 }: {
   barClassName: string;
-  enabled: boolean;
   hint: string;
   label: string;
-  metric: (typeof vitalItems)[number]['key'];
+  mood: (typeof vitalItems)[number]['key'];
+  totalVotes: number;
   value: number;
 }) {
-  const progress = clampPercent(value * 18);
+  const progress = totalVotes > 0 ? clampPercent((value / totalVotes) * 100) : 0;
 
   return (
-    <div data-testid={`home-vital-${metric}`} className="space-y-2.5">
+    <div data-testid={`home-mood-vote-${mood}`} className="space-y-2.5">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="text-sm font-black text-[var(--neko-ink)]">{label}</div>
           <div className="mt-0.5 text-xs text-[var(--neko-muted)]">{hint}</div>
         </div>
         <div className="flex items-center gap-2">
-          <span data-testid={`home-vital-${metric}-value`} className="min-w-[40px] text-right text-sm font-black text-[var(--neko-ink)]">
+          <span data-testid={`home-mood-vote-${mood}-value`} className="min-w-[40px] text-right text-sm font-black text-[var(--neko-ink)]">
             {value}
           </span>
-          {enabled ? (
-            <form action={incrementHomeVital}>
-              <input type="hidden" name="metric" value={metric} />
-              <button
-                type="submit"
-                data-testid={`home-vital-${metric}-button`}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-[var(--neko-red)] shadow-[0_10px_22px_rgba(93,65,57,0.12)] transition hover:-translate-y-0.5 hover:bg-[#fff7f3]"
-                aria-label={`增加${label}`}
-              >
-                <Plus size={16} />
-              </button>
-            </form>
-          ) : (
-            <Link
-              href="/login?next=/"
-              data-testid={`home-vital-${metric}-button`}
+          <form action={addHomeMoodVote}>
+            <input type="hidden" name="mood" value={mood} />
+            <button
+              type="submit"
+              data-testid={`home-mood-vote-${mood}-button`}
               className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-[var(--neko-red)] shadow-[0_10px_22px_rgba(93,65,57,0.12)] transition hover:-translate-y-0.5 hover:bg-[#fff7f3]"
-              aria-label={`登录后记录${label}`}
+              aria-label={`投票给${label}`}
             >
               <Plus size={16} />
-            </Link>
-          )}
+            </button>
+          </form>
         </div>
       </div>
       <div className="h-2.5 overflow-hidden rounded-full bg-[#e5d8d0]">

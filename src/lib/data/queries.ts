@@ -1,10 +1,11 @@
-import { subDays } from 'date-fns';
+import { addDays, subDays } from 'date-fns';
 
 import { getCurrentSessionUser } from '@/lib/auth/session';
-import { emptyUserHomeVitals, parseSiteHomeState, parseUserHomeVitals } from '@/lib/home/state';
+import { homeMoodVoteOptions, parseSiteHomeState } from '@/lib/home/state';
 import { getHomeVisitCount } from '@/lib/home/visits';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import { clampPercent, excerptFromMarkdown, formatDate, getCurrentDayIndex, getShanghaiDateString, slugify } from '@/lib/utils/format';
+import type { HomeMoodVote } from '@/lib/home/state';
 
 export type SiteSettings = {
   id: number;
@@ -86,6 +87,11 @@ export type PostComment = {
 export type ViewerReactionKey = 'watch' | 'favorite' | 'cheer';
 
 export type ViewerReactionStats = Record<ViewerReactionKey, number> & {
+  total: number;
+};
+
+export type HomeMoodVoteStats = Record<HomeMoodVote, number> & {
+  leadingMood: HomeMoodVote | null;
   total: number;
 };
 
@@ -292,6 +298,44 @@ export async function getViewerReactionStats(): Promise<ViewerReactionStats> {
   };
 }
 
+export async function getTodayHomeMoodVoteStats(todayString = getTodayString()): Promise<HomeMoodVoteStats> {
+  const service = createServiceRoleClient();
+  const start = `${todayString}T00:00:00+08:00`;
+  const end = `${formatDate(addDays(new Date(`${todayString}T00:00:00+08:00`), 1))}T00:00:00+08:00`;
+  const { data, error } = await service
+    .from('home_mood_votes')
+    .select('mood')
+    .gte('created_at', start)
+    .lt('created_at', end)
+    .returns<Array<{ mood: string }>>();
+
+  if (error) {
+    throw new Error(`Failed to load home mood votes: ${error.message}`);
+  }
+
+  const stats = Object.fromEntries(homeMoodVoteOptions.map((mood) => [mood, 0])) as Record<HomeMoodVote, number>;
+  (data ?? []).forEach((vote) => {
+    if (homeMoodVoteOptions.includes(vote.mood as HomeMoodVote)) {
+      stats[vote.mood as HomeMoodVote] += 1;
+    }
+  });
+
+  let leadingMood: HomeMoodVote | null = null;
+  let max = 0;
+  homeMoodVoteOptions.forEach((mood) => {
+    if (stats[mood] > max) {
+      leadingMood = mood;
+      max = stats[mood];
+    }
+  });
+
+  return {
+    ...stats,
+    leadingMood,
+    total: homeMoodVoteOptions.reduce((sum, mood) => sum + stats[mood], 0),
+  };
+}
+
 export async function getProfiles() {
   const service = createServiceRoleClient();
   const { data, error } = await service
@@ -307,17 +351,18 @@ export async function getProfiles() {
 }
 
 export async function getDashboardData() {
-  const [settings, projects, incomeRecords, posts, currentUser, visitCount] = await Promise.all([
+  const todayString = getTodayString();
+  const [settings, projects, incomeRecords, posts, currentUser, visitCount, moodVoteStats] = await Promise.all([
     getSiteSettings(),
     getProjects(),
     getIncomeRecords(),
     getPosts(5),
     getCurrentSessionUser(),
     getHomeVisitCount(),
+    getTodayHomeMoodVoteStats(todayString),
   ]);
 
   const today = new Date();
-  const todayString = getTodayString();
   const homeState = parseSiteHomeState(settings.site_subtitle);
   const currentDay = getCurrentDayIndex(settings.start_date);
   const totalRevenue = incomeRecords.reduce((sum, item) => sum + Number(item.amount), 0);
@@ -356,11 +401,10 @@ export async function getDashboardData() {
   });
 
   let viewer: { id: string; email: string; displayName: string | null } | null = null;
-  let viewerVitals = null;
 
   if (currentUser?.id) {
     const service = createServiceRoleClient();
-    const { data, error } = await service.auth.admin.getUserById(currentUser.id);
+    const { data } = await service.auth.admin.getUserById(currentUser.id);
     const authUser = data.user;
 
     viewer = {
@@ -371,23 +415,19 @@ export async function getDashboardData() {
           ? authUser.user_metadata.display_name
           : currentUser.user_metadata?.display_name ?? null,
     };
-
-    viewerVitals = error
-      ? emptyUserHomeVitals(todayString)
-      : parseUserHomeVitals(authUser?.user_metadata?.home_vitals, todayString);
   }
 
   return {
     settings,
     posts,
     homeStatus: {
-      mood: homeState.homeMood,
+      mood: moodVoteStats.leadingMood ?? '开心',
       tagline: homeState.tagline,
       todayString,
       visitCount,
+      moodVoteStats,
     },
     viewer,
-    viewerVitals,
     summary: {
       currentDay,
       totalRevenue,

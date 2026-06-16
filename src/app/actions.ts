@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
 import { requireAdmin, syncProfile } from '@/lib/auth/session';
-import { homeMoodOptions, homeVitalMetricKeys, incrementUserHomeVitals, parseSiteHomeState, serializeSiteHomeState } from '@/lib/home/state';
+import { homeMoodOptions, homeMoodVoteOptions, parseSiteHomeState, serializeSiteHomeState } from '@/lib/home/state';
 import { buildPostPayload, incomeTypeValues, postTypeValues } from '@/lib/data/queries';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
@@ -101,8 +101,8 @@ const homeMoodSchema = z.object({
   mood: z.enum(homeMoodOptions),
 });
 
-const homeVitalSchema = z.object({
-  metric: z.enum(homeVitalMetricKeys),
+const homeMoodVoteSchema = z.object({
+  mood: z.enum(homeMoodVoteOptions),
 });
 
 export async function signInWithMagicLink(formData: FormData) {
@@ -203,36 +203,19 @@ export async function updateHomeMood(formData: FormData) {
   revalidatePath('/app/today');
 }
 
-export async function incrementHomeVital(formData: FormData) {
+export async function addHomeMoodVote(formData: FormData) {
   const profile = await syncProfile();
-
-  if (!profile) {
-    redirect('/login?next=/');
-  }
-
-  const parsed = homeVitalSchema.parse({
-    metric: formData.get('metric'),
+  const parsed = homeMoodVoteSchema.parse({
+    mood: formData.get('mood'),
   });
   const service = createServiceRoleClient();
-  const { data, error } = await service.auth.admin.getUserById(profile.id);
-  const authUser = data.user;
-
-  if (error || !authUser) {
-    throw new Error(`读取用户状态失败：${error?.message ?? 'missing user'}`);
-  }
-
-  const existingMetadata =
-    authUser.user_metadata && typeof authUser.user_metadata === 'object' && !Array.isArray(authUser.user_metadata) ? authUser.user_metadata : {};
-  const nextVitals = incrementUserHomeVitals(existingMetadata.home_vitals, getShanghaiDateString(), parsed.metric);
-  const { error: updateError } = await service.auth.admin.updateUserById(profile.id, {
-    user_metadata: {
-      ...existingMetadata,
-      home_vitals: nextVitals,
-    },
+  const { error } = await service.from('home_mood_votes').insert({
+    mood: parsed.mood,
+    user_id: profile?.id ?? null,
   });
 
-  if (updateError) {
-    throw new Error(`更新首页计数失败：${updateError.message}`);
+  if (error) {
+    throw new Error(`更新首页心情投票失败：${error.message}`);
   }
 
   revalidatePath('/');
