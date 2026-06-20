@@ -1,13 +1,14 @@
 import { TodayIncomeForm } from '@/components/app/forms';
 import { AdminPanel, EmptyState, PanelHeading } from '@/components/app/admin-ui';
 import { SectionHeader } from '@/components/app/section-header';
-import { getIncomeRecords, getProjects, getIncomeTypeLabel } from '@/lib/data/queries';
-import { formatCurrency, formatDate } from '@/lib/utils/format';
+import { filterIncomeRecordsFromStart, getIncomeRecords, getProjects, getIncomeTypeLabel, getSiteSettings } from '@/lib/data/queries';
+import { formatCurrency, formatDate, getShanghaiDateString } from '@/lib/utils/format';
 
 export default async function IncomePage() {
-  const [projects, records] = await Promise.all([getProjects(), getIncomeRecords()]);
+  const [projects, settings, allRecords] = await Promise.all([getProjects(), getSiteSettings(), getIncomeRecords()]);
+  const records = filterIncomeRecordsFromStart(allRecords, settings.start_date);
   const totalRevenue = records.reduce((sum, item) => sum + Number(item.amount), 0);
-  const today = formatDate(new Date());
+  const today = getShanghaiDateString();
   const todayRevenue = records.filter((item) => item.record_date === today).reduce((sum, item) => sum + Number(item.amount), 0);
   const positiveRecords = records.filter((item) => Number(item.amount) >= 0).length;
 

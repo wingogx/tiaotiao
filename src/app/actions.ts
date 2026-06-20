@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
 import { requireAdmin, syncProfile } from '@/lib/auth/session';
-import { homeMoodOptions, homeMoodVoteOptions, parseSiteHomeState, serializeSiteHomeState } from '@/lib/home/state';
+import { homeMoodVoteOptions } from '@/lib/home/state';
 import { buildPostPayload, incomeTypeValues, postTypeValues } from '@/lib/data/queries';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
@@ -67,10 +67,6 @@ const commentSchema = z.object({
   body: z.string().trim().min(1, '留言不能为空').max(500, '留言最多 500 字'),
 });
 
-const reactionSchema = z.object({
-  reactionKey: z.enum(['watch', 'favorite', 'cheer']),
-});
-
 const commentIdSchema = z.object({
   commentId: z.string().uuid(),
   slug: z.string().min(1),
@@ -97,13 +93,20 @@ const adminCreateUserSchema = z.object({
   canViewArticles: z.enum(['true', 'false']),
 });
 
-const homeMoodSchema = z.object({
-  mood: z.enum(homeMoodOptions),
-});
-
 const homeMoodVoteSchema = z.object({
   mood: z.enum(homeMoodVoteOptions),
 });
+
+function buildTaskTemplatePayload(parsed: z.infer<typeof taskTemplateSchema>) {
+  return {
+    title: parsed.title,
+    source_type: parsed.sourceType,
+    project_id: parsed.projectId || null,
+    start_date: parsed.sourceType === 'project_once' ? null : parsed.startDate || null,
+    end_date: parsed.sourceType === 'project_once' ? null : parsed.endDate || null,
+    scheduled_date: parsed.sourceType === 'project_once' ? parsed.scheduledDate || null : null,
+  };
+}
 
 export async function signInWithMagicLink(formData: FormData) {
   const email = String(formData.get('email') ?? '').trim();
@@ -169,38 +172,6 @@ export async function signOut() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
   redirect('/');
-}
-
-export async function updateHomeMood(formData: FormData) {
-  await requireAdmin();
-  const service = createServiceRoleClient();
-  const parsed = homeMoodSchema.parse({
-    mood: formData.get('mood'),
-  });
-
-  const { data: settings, error: settingsError } = await service.from('site_settings').select('site_subtitle').eq('id', 1).single<{ site_subtitle: string }>();
-
-  if (settingsError || !settings) {
-    throw new Error(`读取首页状态失败：${settingsError?.message ?? 'missing data'}`);
-  }
-
-  const currentState = parseSiteHomeState(settings.site_subtitle);
-  const { error } = await service
-    .from('site_settings')
-    .update({
-      site_subtitle: serializeSiteHomeState({
-        tagline: currentState.tagline,
-        homeMood: parsed.mood,
-      }),
-    })
-    .eq('id', 1);
-
-  if (error) {
-    throw new Error(`更新首页状态失败：${error.message}`);
-  }
-
-  revalidatePath('/');
-  revalidatePath('/app/today');
 }
 
 export async function addHomeMoodVote(formData: FormData) {
@@ -343,14 +314,7 @@ export async function createTaskTemplate(formData: FormData) {
     scheduledDate: formData.get('scheduledDate'),
   });
 
-  const { error } = await service.from('task_templates').insert({
-    title: parsed.title,
-    source_type: parsed.sourceType,
-    project_id: parsed.projectId || null,
-    start_date: parsed.sourceType === 'project_once' ? null : parsed.startDate || null,
-    end_date: parsed.sourceType === 'project_once' ? null : parsed.endDate || null,
-    scheduled_date: parsed.sourceType === 'project_once' ? parsed.scheduledDate || null : null,
-  });
+  const { error } = await service.from('task_templates').insert(buildTaskTemplatePayload(parsed));
 
   if (error) {
     throw new Error(`创建任务模板失败：${error.message}`);
@@ -375,14 +339,7 @@ export async function updateTaskTemplate(formData: FormData) {
 
   const { error } = await service
     .from('task_templates')
-    .update({
-      title: parsed.title,
-      source_type: parsed.sourceType,
-      project_id: parsed.projectId || null,
-      start_date: parsed.sourceType === 'project_once' ? null : parsed.startDate || null,
-      end_date: parsed.sourceType === 'project_once' ? null : parsed.endDate || null,
-      scheduled_date: parsed.sourceType === 'project_once' ? parsed.scheduledDate || null : null,
-    })
+    .update(buildTaskTemplatePayload(parsed))
     .eq('id', parsed.id);
 
   if (error) {
@@ -558,24 +515,6 @@ export async function hidePostComment(formData: FormData) {
 
   revalidatePath(`/articles/${parsed.slug}`);
   revalidatePath(`/app/articles/${parsed.slug}`);
-}
-
-export async function addViewerReaction(formData: FormData) {
-  const parsed = reactionSchema.parse({
-    reactionKey: formData.get('reactionKey') ?? 'watch',
-  });
-  const profile = await syncProfile();
-  const service = createServiceRoleClient();
-  const { error } = await service.from('viewer_reactions').insert({
-    reaction_key: parsed.reactionKey,
-    user_id: profile?.id ?? null,
-  });
-
-  if (error) {
-    throw new Error(`记录围观失败：${error.message}`);
-  }
-
-  revalidatePath('/');
 }
 
 export async function updateProfileRole(formData: FormData) {
