@@ -1,9 +1,9 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { BookOpen, Clock3, Compass, PawPrint, Plus, Settings, Target, UserRound, Zap } from 'lucide-react';
 
 import { addHomeMoodVote } from '@/app/actions';
+import { CompanionStage } from '@/components/home/companion-stage';
 import { HomeVisitPill } from '@/components/home/home-visit-pill';
 import { normalizeHomeMood } from '@/lib/home/state';
 import { clampPercent, formatCompactCurrency, formatCurrency } from '@/lib/utils/format';
@@ -112,20 +112,7 @@ export function Hero({ data }: { data: DashboardData }) {
 
           </aside>
 
-          <div className="relative order-first flex min-h-[640px] items-end justify-center md:min-h-[760px] lg:order-none lg:min-h-[980px]">
-            <div className="neko-room-glow" />
-            <div className="absolute inset-x-10 top-10 bottom-24 rounded-[140px] bg-[radial-gradient(circle_at_center,rgba(255,237,214,0.46),rgba(255,244,234,0)_70%)]" />
-            <div className="absolute bottom-12 h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle,rgba(204,171,137,0.18),rgba(255,241,229,0)_68%)]" />
-            <Image
-              src="/assets/companion-lumia-stage-cutout.png"
-              alt="Lumia 养成伙伴"
-              width={430}
-              height={1060}
-              unoptimized
-              priority
-              className="neko-avatar relative z-10 h-[620px] w-auto max-w-[82vw] object-contain md:h-[820px] lg:h-[930px]"
-            />
-          </div>
+          <CompanionStage />
 
           <aside className="z-10 flex flex-col gap-5 lg:pt-20">
             <Panel className="min-h-[520px]">
