@@ -1,7 +1,7 @@
 import { addDays, subDays } from 'date-fns';
 
 import { getCurrentSessionUser } from '@/lib/auth/session';
-import { homeMoodVoteOptions, parseSiteHomeState } from '@/lib/home/state';
+import { homeMoodVoteOptions } from '@/lib/home/state';
 import { getHomeVisitCount } from '@/lib/home/visits';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import { clampPercent, excerptFromMarkdown, formatDate, getCurrentDayIndex, getShanghaiDateString, slugify } from '@/lib/utils/format';
@@ -82,12 +82,6 @@ export type PostComment = {
   body: string;
   created_at: string;
   profiles?: Pick<ProfileSummary, 'display_name' | 'email'> | null;
-};
-
-export type ViewerReactionKey = 'watch' | 'favorite' | 'cheer';
-
-export type ViewerReactionStats = Record<ViewerReactionKey, number> & {
-  total: number;
 };
 
 export type HomeMoodVoteStats = Record<HomeMoodVote, number> & {
@@ -184,6 +178,18 @@ export async function getIncomeRecords() {
   return data ?? [];
 }
 
+export function filterIncomeRecordsFromStart(records: IncomeRecord[], startDate: string) {
+  return records.filter((record) => record.record_date >= startDate);
+}
+
+function sumIncomeRecords(records: IncomeRecord[]) {
+  return records.reduce((sum, item) => sum + Number(item.amount), 0);
+}
+
+function countCompletedTasks(tasks: DailyTask[]) {
+  return tasks.filter((item) => item.status === 'completed').length;
+}
+
 export async function getTaskTemplates() {
   const service = createServiceRoleClient();
   const { data, error } = await service
@@ -240,6 +246,10 @@ export async function getPosts(limit?: number) {
   return data ?? [];
 }
 
+export function filterPostsFromStart(posts: DailyPost[], startDate: string) {
+  return posts.filter((post) => post.post_date >= startDate);
+}
+
 export async function getPostBySlug(slug: string) {
   const service = createServiceRoleClient();
   const { data, error } = await service
@@ -270,32 +280,6 @@ export async function getPostComments(postId: string) {
   }
 
   return data ?? [];
-}
-
-export async function getViewerReactionCount(reactionKey = 'watch') {
-  const service = createServiceRoleClient();
-  const { count, error } = await service.from('viewer_reactions').select('id', { count: 'exact', head: true }).eq('reaction_key', reactionKey);
-
-  if (error) {
-    throw new Error(`Failed to load viewer reaction count: ${error.message}`);
-  }
-
-  return count ?? 0;
-}
-
-export async function getViewerReactionStats(): Promise<ViewerReactionStats> {
-  const [watch, favorite, cheer] = await Promise.all([
-    getViewerReactionCount('watch'),
-    getViewerReactionCount('favorite'),
-    getViewerReactionCount('cheer'),
-  ]);
-
-  return {
-    watch,
-    favorite,
-    cheer,
-    total: watch + favorite + cheer,
-  };
 }
 
 export async function getTodayHomeMoodVoteStats(todayString = getTodayString()): Promise<HomeMoodVoteStats> {
@@ -363,19 +347,18 @@ export async function getDashboardData() {
   ]);
 
   const today = new Date();
-  const homeState = parseSiteHomeState(settings.site_subtitle);
   const currentDay = getCurrentDayIndex(settings.start_date);
-  const totalRevenue = incomeRecords.reduce((sum, item) => sum + Number(item.amount), 0);
-  const todayRevenue = incomeRecords
-    .filter((item) => item.record_date === todayString)
-    .reduce((sum, item) => sum + Number(item.amount), 0);
+  const periodIncomeRecords = filterIncomeRecordsFromStart(incomeRecords, settings.start_date);
+  const periodPosts = filterPostsFromStart(posts, settings.start_date);
+  const totalRevenue = sumIncomeRecords(periodIncomeRecords);
+  const todayRevenue = sumIncomeRecords(periodIncomeRecords.filter((item) => item.record_date === todayString));
   const activeProjects = projects.filter((item) => item.status === 'active').length;
   const timeProgress = clampPercent((currentDay / settings.total_days) * 100);
   const incomeProgress = clampPercent((totalRevenue / Number(settings.total_target)) * 100);
   const gapToGoal = Number(settings.total_target) - totalRevenue;
 
   const revenueMap = new Map<string, number>();
-  incomeRecords.forEach((record) => {
+  periodIncomeRecords.forEach((record) => {
     const current = revenueMap.get(record.record_date) ?? 0;
     revenueMap.set(record.record_date, current + Number(record.amount));
   });
@@ -390,9 +373,7 @@ export async function getDashboardData() {
   });
 
   const projectTotals = projects.map((project) => {
-    const total = incomeRecords
-      .filter((item) => item.project_id === project.id)
-      .reduce((sum, item) => sum + Number(item.amount), 0);
+    const total = sumIncomeRecords(periodIncomeRecords.filter((item) => item.project_id === project.id));
 
     return {
       ...project,
@@ -419,10 +400,9 @@ export async function getDashboardData() {
 
   return {
     settings,
-    posts,
+    posts: periodPosts,
     homeStatus: {
       mood: moodVoteStats.leadingMood ?? '开心',
-      tagline: homeState.tagline,
       todayString,
       visitCount,
       moodVoteStats,
@@ -452,24 +432,20 @@ export async function getTodayConsoleData() {
   ]);
 
   const todayString = getTodayString();
-  const homeState = parseSiteHomeState(settings.site_subtitle);
-  const todayIncomeRecords = incomeRecords.filter((item) => item.record_date === todayString);
-  const todayRevenue = todayIncomeRecords.reduce((sum, item) => sum + Number(item.amount), 0);
-  const totalRevenue = incomeRecords.reduce((sum, item) => sum + Number(item.amount), 0);
-  const completedTasks = tasks.filter((item) => item.status === 'completed').length;
+  const periodIncomeRecords = filterIncomeRecordsFromStart(incomeRecords, settings.start_date);
+  const periodPosts = filterPostsFromStart(posts, settings.start_date);
+  const todayIncomeRecords = periodIncomeRecords.filter((item) => item.record_date === todayString);
+  const todayRevenue = sumIncomeRecords(todayIncomeRecords);
+  const totalRevenue = sumIncomeRecords(periodIncomeRecords);
+  const completedTasks = countCompletedTasks(tasks);
   const pendingTasks = tasks.length - completedTasks;
 
   return {
     settings,
-    homeStatus: {
-      mood: homeState.homeMood,
-      tagline: homeState.tagline,
-      todayString,
-    },
     projects,
     tasks,
-    posts,
-    incomeRecords,
+    posts: periodPosts,
+    incomeRecords: periodIncomeRecords,
     todayIncomeRecords,
     summary: {
       todayString,
@@ -491,12 +467,13 @@ export async function getProgressData() {
     getDailyTasks(),
   ]);
 
-  const totalRevenue = incomeRecords.reduce((sum, item) => sum + Number(item.amount), 0);
+  const periodIncomeRecords = filterIncomeRecordsFromStart(incomeRecords, settings.start_date);
+  const totalRevenue = sumIncomeRecords(periodIncomeRecords);
   const currentDay = getCurrentDayIndex(settings.start_date);
-  const completedTasks = tasks.filter((item) => item.status === 'completed').length;
+  const completedTasks = countCompletedTasks(tasks);
   const totalTasks = tasks.length;
   const revenueByDate = new Map<string, number>();
-  incomeRecords.forEach((record) => {
+  periodIncomeRecords.forEach((record) => {
     revenueByDate.set(record.record_date, (revenueByDate.get(record.record_date) ?? 0) + Number(record.amount));
   });
 

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { CalendarCheck, CheckCircle2, Coins, FileText } from 'lucide-react';
 
 import { AdminPanel } from '@/components/app/admin-ui';
-import { TodayIncomeForm, TodayMoodForm, TodayPostForm, TodayTaskList } from '@/components/app/forms';
+import { TodayIncomeForm, TodayPostForm, TodayTaskList } from '@/components/app/forms';
 import { requireAdmin } from '@/lib/auth/session';
 import { getTodayConsoleData } from '@/lib/data/queries';
 import { formatCurrency, formatPercent } from '@/lib/utils/format';
@@ -50,8 +50,6 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
         <ConsoleStat icon={<CalendarCheck size={20} />} label="未完成任务" value={`${data.summary.pendingTasks} 项`} muted="晚上复盘前清掉" />
         <ConsoleStat icon={<FileText size={20} />} label="最新文章" value={data.posts[0]?.title ?? '未发布'} muted="写完后前台展示标题" />
       </div>
-
-      <TodayMoodForm currentMood={data.homeStatus.mood} />
 
       <nav className="grid grid-cols-3 gap-2 rounded-[28px] border border-[var(--neko-line)] bg-white/78 p-2 shadow-[0_14px_38px_rgba(93,65,57,0.08)] backdrop-blur-xl">
         {todayTabs.map((tab) => {
