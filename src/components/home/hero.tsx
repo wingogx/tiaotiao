@@ -78,7 +78,7 @@ export function Hero({ data }: { data: DashboardData }) {
               <h1 className="mt-5 text-[2rem] font-black leading-tight text-[#171414]">
                 {heroHeadline}
                 <br />
-                Lumia
+                Hiyori
               </h1>
               <p className="mt-4 text-base leading-8 text-[var(--neko-brown)]">{getMoodCopy(mood)}</p>
               <div className="mt-5 flex flex-wrap items-center gap-3">

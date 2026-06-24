@@ -56,14 +56,14 @@ export default async function MePage() {
             <div className="relative min-h-[360px] bg-[radial-gradient(circle_at_50%_10%,rgba(255,224,193,0.9),transparent_48%),linear-gradient(180deg,#fffaf6,#f5e7dc)] md:min-h-[430px]">
               <Image
                 src="/assets/companion-lumia-stage-cutout.png"
-                alt="Lumia 同伴"
+                alt="Hiyori 同伴"
                 width={240}
                 height={600}
                 unoptimized
                 className="absolute bottom-0 left-2 h-[340px] w-auto object-contain drop-shadow-[0_20px_30px_rgba(118,88,78,0.2)] md:left-8 md:h-[410px]"
               />
               <div className="absolute bottom-5 right-5 w-[190px] rounded-[26px] border border-[var(--neko-line)] bg-white/78 p-4 shadow-[0_14px_34px_rgba(93,65,57,0.12)] backdrop-blur-xl md:w-[220px]">
-                <div className="text-2xl font-black text-[var(--neko-ink)]">Lumia</div>
+                <div className="text-2xl font-black text-[var(--neko-ink)]">Hiyori</div>
                 <div className="mt-2 inline-flex rounded-full bg-[#f7dfe4] px-3 py-1 text-xs font-bold text-[var(--neko-red)]">当前同伴</div>
                 <div className="mt-4 text-xs leading-6 text-[var(--neko-muted)]">把收入、任务、复盘转成养成进度。</div>
                 <ProgressLine label="目标进度" value={data.summary.incomeProgress} />

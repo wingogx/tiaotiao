@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     "api/**",
     "css/**",
     "data/**",
+    "public/live2d/**",
+    "public/vendor/**",
     "index*.html",
     "tasks.html",
   ]),
